@@ -1,0 +1,576 @@
+[
+  {
+    "name": "Consumer Protection Act 2019",
+    "year": "2019",
+    "category": "Consumer Law",
+    "description": "Governs consumer rights, redressal mechanism (District/State/National Commissions), product liability, unfair trade practices, and e-commerce. Repealed the Consumer Protection Act 1986.",
+    "amendments": [
+      {
+        "year": "2020",
+        "description": "Consumer Protection (E-Commerce) Rules 2020 notified under this Act.",
+        "amending_act": "Rules"
+      },
+      {
+        "year": "2021",
+        "description": "Pecuniary jurisdiction revised: District Commission up to Rs 1 crore; State Commission Rs 1–10 crore; National Commission above Rs 10 crore.",
+        "amending_act": "Consumer Protection (Pecuniary Jurisdiction) Amendment Rules 2021"
+      }
+    ],
+    "sections": [
+      {
+        "section": "2(7)",
+        "title": "Definition of 'Consumer'",
+        "text": "'Consumer' means any person who buys any goods for a consideration which has been paid or promised or partly paid and partly promised, or under any system of deferred payment and includes any user of such goods other than the person who buys such goods for consideration paid or promised or partly paid or partly promised, but does not include a person who obtains such goods for resale or for any commercial purpose.",
+        "amendments": []
+      },
+      {
+        "section": "2(11)",
+        "title": "Definition of 'Defect'",
+        "text": "'Defect' means any fault, imperfection or shortcoming in the quality, quantity, potency, purity or standard which is required to be maintained by or under any law for the time being in force or under any contract, express or implied, or as is claimed by the trader in any manner whatsoever in relation to any goods or product.",
+        "amendments": []
+      },
+      {
+        "section": "2(17)",
+        "title": "Definition of 'Unfair Trade Practice'",
+        "text": "Means a trade practice which, for the purpose of promoting sale, use or supply of any goods or for provision of any service, adopts any unfair method or unfair or deceptive practice including making false or misleading representations, false statements about price, and offering gifts or prizes.",
+        "amendments": []
+      },
+      {
+        "section": "34",
+        "title": "Jurisdiction of District Commission",
+        "text": "Subject to the other provisions of this Act, the District Commission shall have jurisdiction to entertain complaints where the value of goods or services paid as consideration does not exceed one crore rupees. Complaints may be filed where the opposite party ordinarily resides or carries on business, or where the cause of action arises.",
+        "amendments": [
+          {
+            "year": "2021",
+            "description": "Pecuniary limit raised from Rs 20 lakhs to Rs 1 crore.",
+            "amending_act": "Consumer Protection (Pecuniary Jurisdiction) Amendment Rules 2021"
+          }
+        ]
+      },
+      {
+        "section": "47",
+        "title": "Jurisdiction of State Commission",
+        "text": "The State Commission shall have jurisdiction to entertain complaints where the value of goods or services paid as consideration exceeds one crore rupees but does not exceed ten crore rupees. Also entertains appeals from District Commission orders.",
+        "amendments": []
+      },
+      {
+        "section": "58",
+        "title": "Jurisdiction of National Commission",
+        "text": "The National Commission shall have jurisdiction to entertain complaints where the value of goods or services paid as consideration exceeds ten crore rupees. Also entertains appeals from State Commission orders and exercises revisional jurisdiction.",
+        "amendments": []
+      },
+      {
+        "section": "69",
+        "title": "Limitation Period",
+        "text": "The District Commission, the State Commission or the National Commission shall not admit a complaint unless it is filed within two years from the date on which the cause of action has arisen. The Commission may condone delay where it is satisfied that there was sufficient cause for not filing the complaint within such period.",
+        "amendments": []
+      },
+      {
+        "section": "86",
+        "title": "Product Liability",
+        "text": "A product manufacturer shall be liable in a product liability action if the product contains a manufacturing defect, has a design defect, there is a deviation from manufacturing specifications, or the product does not conform to an express warranty.",
+        "amendments": []
+      },
+      {
+        "section": "89",
+        "title": "Unfair Contract",
+        "text": "A complaint in relation to any goods sold or delivered or agreed to be sold or delivered or any service provided or agreed to be provided may include a complaint in relation to an unfair contract entered into between the trader and a consumer. The Commission may declare a contract term as unfair and void.",
+        "amendments": []
+      }
+    ]
+  },
+  {
+    "name": "Code of Civil Procedure 1908",
+    "year": "1908",
+    "category": "Civil Procedure",
+    "description": "The principal procedural law governing the institution and conduct of civil suits in India. Contains provisions on jurisdiction, parties, pleadings, discovery, trial, appeals, execution, and special procedures.",
+    "amendments": [
+      {
+        "year": "1976",
+        "description": "Major amendment; introduced commercial division, added provisions on summons.",
+        "amending_act": "CPC Amendment Act 1976"
+      },
+      {
+        "year": "2002",
+        "description": "Introduced case management, time limits for trials, amendment to pleadings restricted.",
+        "amending_act": "CPC Amendment Act 2002"
+      }
+    ],
+    "sections": [
+      {
+        "section": "9",
+        "title": "Courts to try all civil suits unless barred",
+        "text": "The Courts shall (subject to the provisions herein contained) have jurisdiction to try all suits of a civil nature excepting suits of which their cognizance is either expressly or impliedly barred.",
+        "amendments": []
+      },
+      {
+        "section": "20",
+        "title": "Other suits to be instituted where defendants reside or cause of action arises",
+        "text": "Subject to the limitations aforesaid, every suit shall be instituted in a Court within the local limits of whose jurisdiction the defendant actually and voluntarily resides, or carries on business, or personally works for gain; or where the cause of action wholly or in part arises.",
+        "amendments": []
+      },
+      {
+        "section": "96",
+        "title": "Appeal from original decree",
+        "text": "Save where otherwise expressly provided in the body of this Code or by any other law for the time being in force, an appeal shall lie from every decree passed by any Court exercising original jurisdiction to the Court authorised to hear appeals from the decisions of such Court.",
+        "amendments": []
+      },
+      {
+        "section": "Order 6 Rule 17",
+        "title": "Amendment of pleadings",
+        "text": "The Court may at any stage of the proceedings allow either party to alter or amend his pleadings in such manner and on such terms as may be just, and all such amendments shall be made as may be necessary for the purpose of determining the real questions in controversy between the parties. Proviso: No application for amendment shall be allowed after the trial has commenced, unless the Court comes to the conclusion that in spite of due diligence, the party could not have raised the matter before commencement of trial.",
+        "amendments": [
+          {
+            "year": "2002",
+            "description": "Proviso added restricting amendment after commencement of trial.",
+            "amending_act": "CPC Amendment Act 2002"
+          }
+        ]
+      },
+      {
+        "section": "Order 7 Rule 11",
+        "title": "Rejection of plaint",
+        "text": "The plaint shall be rejected in the following cases: (a) where it does not disclose a cause of action; (b) where the relief claimed is undervalued; (c) where the relief claimed is properly valued but the plaint is written on paper insufficiently stamped; (d) where the suit appears from the statement in the plaint to be barred by any law; (f) where it is not filed in duplicate; (g) where the plaintiff fails to comply with the provisions of rule 9.",
+        "amendments": []
+      },
+      {
+        "section": "Order 8 Rule 1",
+        "title": "Written statement",
+        "text": "The defendant shall, within thirty days from the date of service of summons on him, present a written statement of his defence. The Court may, for reasons to be recorded in writing, extend the said period but the period shall not be more than ninety days from the date of service of summons.",
+        "amendments": [
+          {
+            "year": "2002",
+            "description": "Time limit of 30 days (extendable to 90 days) introduced.",
+            "amending_act": "CPC Amendment Act 2002"
+          }
+        ]
+      },
+      {
+        "section": "Order 39 Rules 1-2",
+        "title": "Temporary injunctions",
+        "text": "Rule 1: Cases in which temporary injunction may be granted: Where in any suit it is proved by affidavit or otherwise that any property in dispute is in danger of being wasted, damaged or alienated by any party to the suit, or wrongfully sold, the Court may grant a temporary injunction. Rule 2: Injunction to restrain repetition or continuance of breach — the Court may by order grant an injunction restraining a party from committing a breach of contract or other injury of any kind.",
+        "amendments": []
+      },
+      {
+        "section": "Order 39 Rule 3",
+        "title": "Before granting injunction, Court to direct notice to opposite party",
+        "text": "The Court shall, before granting an injunction, direct notice of the application for the injunction to be given to the opposite party, except where it appears that the object of granting the injunction would be defeated by the delay in giving notice. Where notice is dispensed with, the Court shall record reasons for the same.",
+        "amendments": []
+      }
+    ]
+  },
+  {
+    "name": "Arbitration and Conciliation Act 1996",
+    "year": "1996",
+    "category": "Arbitration",
+    "description": "Governs domestic and international commercial arbitration and conciliation in India. Based on the UNCITRAL Model Law. Key amendments in 2015, 2019, and 2021 significantly reformed the arbitration ecosystem.",
+    "amendments": [
+      {
+        "year": "2015",
+        "description": "Introduced time limits for arbitration (12 months + 6 months), expedited proceedings, costs regime, and Section 36 amendment on enforcement.",
+        "amending_act": "Arbitration and Conciliation (Amendment) Act 2015"
+      },
+      {
+        "year": "2019",
+        "description": "Introduced Arbitration Council of India (ACI), grading of arbitrators, international arbitration at institutional level. Inserted Section 42A (confidentiality).",
+        "amending_act": "Arbitration and Conciliation (Amendment) Act 2019"
+      },
+      {
+        "year": "2021",
+        "description": "Section 36 further amended — unconditional stay of award where fraud alleged pending challenge under Section 34.",
+        "amending_act": "Arbitration and Conciliation (Amendment) Act 2021"
+      }
+    ],
+    "sections": [
+      {
+        "section": "7",
+        "title": "Arbitration agreement",
+        "text": "An 'arbitration agreement' means an agreement by the parties to submit to arbitration all or certain disputes which have arisen or which may arise between them in respect of a defined legal relationship, whether contractual or not. An arbitration agreement shall be in writing and is evidenced by a document signed by the parties, by an exchange of letters, telex, telegrams or other means of telecommunication, or an exchange of statements of claim and defence where the existence of an agreement is alleged by one party and not denied by the other.",
+        "amendments": []
+      },
+      {
+        "section": "8",
+        "title": "Power to refer parties to arbitration where there is an arbitration agreement",
+        "text": "A judicial authority, before which an action is brought in a matter which is the subject of an arbitration agreement shall, if a party so applies not later than the date of submitting his first statement on the substance of the dispute, refer the parties to arbitration unless it finds that prima facie no valid arbitration agreement exists.",
+        "amendments": [
+          {
+            "year": "2015",
+            "description": "Amended to allow reference even if the matter is before the court, narrowing judicial intervention.",
+            "amending_act": "Amendment Act 2015"
+          }
+        ]
+      },
+      {
+        "section": "11",
+        "title": "Appointment of arbitrators",
+        "text": "A person of any nationality may be an arbitrator, unless otherwise agreed by the parties. If the appointment procedure agreed upon by the parties fails, or a party fails to act as required under that procedure, on request of a party, the Supreme Court (international arbitration) or the High Court (domestic arbitration) shall take necessary measures to appoint the arbitrator.",
+        "amendments": [
+          {
+            "year": "2015",
+            "description": "Sub-section (6A) inserted — court shall confine examination to existence of arbitration agreement only.",
+            "amending_act": "Amendment Act 2015"
+          },
+          {
+            "year": "2019",
+            "description": "Section 11(3A) inserted — designation of arbitral institutions by Supreme Court/High Court for appointment.",
+            "amending_act": "Amendment Act 2019"
+          }
+        ]
+      },
+      {
+        "section": "17",
+        "title": "Interim measures ordered by arbitral tribunal",
+        "text": "A party may, during arbitral proceedings, apply to the arbitral tribunal for interim measures of protection. The tribunal may order a party to take such interim measures as it may consider necessary in respect of the subject matter of the dispute. Orders of the arbitral tribunal under this section shall be deemed to be orders of the Court and shall be enforceable under the Code of Civil Procedure 1908.",
+        "amendments": [
+          {
+            "year": "2015",
+            "description": "Amended to make tribunal's orders enforceable as court orders.",
+            "amending_act": "Amendment Act 2015"
+          }
+        ]
+      },
+      {
+        "section": "34",
+        "title": "Application for setting aside arbitral award",
+        "text": "Recourse to a Court against an arbitral award may be made only by an application for setting aside such award. An award may be set aside only if: the party was under incapacity; arbitration agreement was not valid; party was not given proper notice; award deals with a dispute not contemplated or beyond arbitration agreement; composition of tribunal was not in accordance with agreement; subject matter is not capable of settlement by arbitration; or award is in conflict with the public policy of India.",
+        "amendments": [
+          {
+            "year": "2015",
+            "description": "Explanation added: award in conflict with public policy means award induced by fraud, in contravention of fundamental policy of Indian law, or in conflict with basic notions of justice or morality.",
+            "amending_act": "Amendment Act 2015"
+          }
+        ]
+      },
+      {
+        "section": "36",
+        "title": "Enforcement",
+        "text": "Where the time for making an application to set aside the arbitral award under section 34 has expired, or such application having been made, it has been refused, the award shall be enforced under the Code of Civil Procedure 1908, in the same manner as if it were a decree of the court. Filing an application under Section 34 does not by itself render the award unenforceable — a separate stay application must be made.",
+        "amendments": [
+          {
+            "year": "2021",
+            "description": "Unconditional stay of award mandated where arbitration agreement or contract is induced by fraud.",
+            "amending_act": "Amendment Act 2021"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Limitation Act 1963",
+    "year": "1963",
+    "category": "Civil Procedure",
+    "description": "Prescribes time limits within which suits, appeals, and applications must be filed in Indian courts. Sections 3-27 contain general rules; the Schedule prescribes specific periods for various actions.",
+    "amendments": [],
+    "sections": [
+      {
+        "section": "3",
+        "title": "Bar of limitation",
+        "text": "Subject to the provisions contained in sections 4 to 24 (inclusive), every suit instituted, appeal preferred, and application made after the prescribed period shall be dismissed although limitation has not been set up as a defence.",
+        "amendments": []
+      },
+      {
+        "section": "5",
+        "title": "Extension of prescribed period in certain cases",
+        "text": "Any appeal or any application, other than an application under any of the provisions of Order XXI of the Code of Civil Procedure, 1908, may be admitted after the prescribed period, if the appellant or the applicant satisfies the Court that he had sufficient cause for not preferring the appeal or making the application within such period.",
+        "amendments": []
+      },
+      {
+        "section": "14",
+        "title": "Exclusion of time of proceeding bona fide in court without jurisdiction",
+        "text": "In computing the period of limitation for any suit, the time during which the plaintiff has been prosecuting with due diligence another civil proceeding, whether in a court of first instance or in a court of appeal or revision, against the defendant shall be excluded, where such proceeding relates to the same matter in issue and is prosecuted in good faith in a court which from defect of jurisdiction or other cause of a like nature, is unable to entertain it.",
+        "amendments": []
+      },
+      {
+        "section": "Schedule Article 54",
+        "title": "Suit for specific performance of a contract",
+        "text": "Limitation: Three years. Starts from: the date fixed for performance, or if no such date is fixed, when the plaintiff has notice that performance is refused.",
+        "amendments": []
+      },
+      {
+        "section": "Schedule Article 58",
+        "title": "Suit to obtain any other declaration",
+        "text": "Limitation: Three years. Starts from: when the right to sue first accrues.",
+        "amendments": []
+      },
+      {
+        "section": "Schedule Article 113",
+        "title": "Any suit for which no period of limitation is provided elsewhere in this Schedule",
+        "text": "Limitation: Three years. Starts from: when the right to sue accrues.",
+        "amendments": []
+      }
+    ]
+  },
+  {
+    "name": "Indian Contract Act 1872",
+    "year": "1872",
+    "category": "Contract Law",
+    "description": "The foundational law governing contracts in India. Covers formation, validity, performance, and breach of contracts. Also governs indemnity, guarantee, bailment, pledge, and agency.",
+    "amendments": [
+      {
+        "year": "1997",
+        "description": "Minor amendments to Section 28 regarding restraint of legal proceedings.",
+        "amending_act": "ICA Amendment 1997"
+      }
+    ],
+    "sections": [
+      {
+        "section": "2(h)",
+        "title": "Definition of 'Contract'",
+        "text": "'Contract' means an agreement enforceable by law.",
+        "amendments": []
+      },
+      {
+        "section": "10",
+        "title": "What agreements are contracts",
+        "text": "All agreements are contracts if they are made by the free consent of parties competent to contract, for a lawful consideration and with a lawful object, and are not hereby expressly declared to be void.",
+        "amendments": []
+      },
+      {
+        "section": "13",
+        "title": "Consent",
+        "text": "Two or more persons are said to consent when they agree upon the same thing in the same sense.",
+        "amendments": []
+      },
+      {
+        "section": "14",
+        "title": "Free consent",
+        "text": "Consent is said to be free when it is not caused by coercion (s.15), undue influence (s.16), fraud (s.17), misrepresentation (s.18), or mistake (ss.20-22).",
+        "amendments": []
+      },
+      {
+        "section": "73",
+        "title": "Compensation for loss or damage caused by breach",
+        "text": "When a contract has been broken, the party who suffers by such breach is entitled to receive, from the party who has broken it, compensation for any loss or damage caused to him thereby, which naturally arose in the usual course of things from such breach, or which the parties knew, when they made the contract, to be likely to result from the breach of it. Such compensation is not to be given for any remote and indirect loss or damage sustained by reason of the breach.",
+        "amendments": []
+      },
+      {
+        "section": "74",
+        "title": "Compensation for breach of contract where penalty stipulated for",
+        "text": "When a contract has been broken, if a sum is named in the contract as the amount to be paid in case of such breach, or if the contract contains any other stipulation by way of penalty, the party complaining of the breach is entitled, whether or not actual damage or loss is proved to have been caused thereby, to receive from the party who has broken the contract reasonable compensation not exceeding the amount so named or, as the case may be, the penalty stipulated for.",
+        "amendments": []
+      }
+    ]
+  },
+  {
+    "name": "Specific Relief Act 1963",
+    "year": "1963",
+    "category": "Civil Law",
+    "description": "Governs specific performance of contracts, rectification and cancellation of instruments, preventive relief (injunctions), and declaratory decrees. Amended significantly in 2018.",
+    "amendments": [
+      {
+        "year": "2018",
+        "description": "Major amendment: specific performance made a rule (not discretion) for infrastructure contracts; Section 14 substituted; Section 20 amended; new Part IIA on special provisions for infrastructure.",
+        "amending_act": "Specific Relief (Amendment) Act 2018"
+      }
+    ],
+    "sections": [
+      {
+        "section": "10",
+        "title": "Cases in which specific performance of contract enforceable",
+        "text": "The specific performance of a contract shall be enforced by the court subject to the provisions contained in sub-section (2) of section 11, section 14 and section 16. Where the act agreed to be done is in the performance wholly or partly of a trust; no standard exists for ascertaining actual damage; the act would not afford adequate relief; or it is a contract to execute a mortgage or furnish security.",
+        "amendments": [
+          {
+            "year": "2018",
+            "description": "Section 10 substituted — specific performance is now a general rule enforceable by courts, removing the earlier judicial discretion element.",
+            "amending_act": "Amendment Act 2018"
+          }
+        ]
+      },
+      {
+        "section": "14",
+        "title": "Contracts not specifically enforceable",
+        "text": "The following contracts cannot be specifically enforced: (a) where a party to the contract has obtained substituted performance of contract; (b) a contract, the performance of which involves the performance of a continuous duty extending over a period longer than three years; (c) a contract which is in its nature determinable.",
+        "amendments": [
+          {
+            "year": "2018",
+            "description": "Old Section 14 significantly narrowed — personal service contracts removed, new categories defined.",
+            "amending_act": "Amendment Act 2018"
+          }
+        ]
+      },
+      {
+        "section": "37",
+        "title": "Temporary and perpetual injunctions",
+        "text": "Temporary injunctions are such as are to continue until a specified time, or until the further order of the court, and they may be granted at any stage of a suit. Perpetual injunctions can only be granted by the decree made at the hearing and upon the merits of the suit.",
+        "amendments": []
+      },
+      {
+        "section": "38",
+        "title": "Perpetual injunction when granted",
+        "text": "Subject to the other provisions contained in or referred to by this Chapter, a perpetual injunction may be granted to the plaintiff to prevent the breach of an obligation existing in his favour, whether expressly or by implication.",
+        "amendments": []
+      }
+    ]
+  },
+  {
+    "name": "Transfer of Property Act 1882",
+    "year": "1882",
+    "category": "Property Law",
+    "description": "Governs the transfer of immovable and some movable property between living persons in India. Covers sale, mortgage, lease, exchange, gift, and actionable claims.",
+    "amendments": [
+      {
+        "year": "2000",
+        "description": "Amendments to Sections 58, 67, 67A regarding mortgages.",
+        "amending_act": "Transfer of Property (Amendment) Act 2000"
+      }
+    ],
+    "sections": [
+      {
+        "section": "5",
+        "title": "Transfer of property defined",
+        "text": "'Transfer of property' means an act by which a living person conveys property, in present or in future, to one or more other living persons, or to himself and one or more other living persons. In this section 'living person' includes a company or association or body of individuals, whether incorporated or not.",
+        "amendments": []
+      },
+      {
+        "section": "54",
+        "title": "Sale defined",
+        "text": "'Sale' is a transfer of ownership in exchange for a price paid or promised or part-paid and part-promised. Sale of tangible immovable property of the value of one hundred rupees and upwards, or in the case of a reversion or other intangible thing, can only be made by a registered instrument.",
+        "amendments": []
+      },
+      {
+        "section": "55",
+        "title": "Rights and liabilities of buyer and seller",
+        "text": "Provides mutual rights and duties of the seller and buyer including the seller's duty to disclose defects, deliver possession, and execute conveyance; buyer's duty to disclose facts increasing value, pay purchase money, and bear loss.",
+        "amendments": []
+      },
+      {
+        "section": "105",
+        "title": "Lease defined",
+        "text": "A lease of immovable property is a transfer of a right to enjoy such property, made for a certain time, express or implied, or in perpetuity, in consideration of a price paid or promised, or of money, a share of crops, service or any other thing of value, to be rendered periodically or on specified occasions to the transferor by the transferee.",
+        "amendments": []
+      },
+      {
+        "section": "111",
+        "title": "Determination of lease",
+        "text": "A lease of immovable property determines: (a) by efflux of the time limited thereby; (b) where a condition is annexed to the holding and breach of it occurs; (c) by the happening of an event that terminates the lease; (d) on the expiry of notice to quit duly given; (e) on the surrender of the lease.",
+        "amendments": []
+      }
+    ]
+  },
+  {
+    "name": "Bharatiya Nyaya Sanhita 2023",
+    "year": "2023",
+    "category": "Criminal Law",
+    "description": "Replaced the Indian Penal Code 1860. Came into force on 1 July 2024. Introduces new offences, reorganises existing offences, and updates punishments. Retains most IPC offences with renumbered sections.",
+    "amendments": [],
+    "sections": [
+      {
+        "section": "3",
+        "title": "General Exceptions — Punishments",
+        "text": "Every person shall be liable to punishment under this Sanhita and not otherwise for every act or omission contrary to the provisions thereof, of which he shall be guilty within India.",
+        "amendments": []
+      },
+      {
+        "section": "101",
+        "title": "Culpable homicide",
+        "text": "Whoever causes death by doing an act with the intention of causing death, or with the intention of causing such bodily injury as is likely to cause death, or with knowledge that he is likely by such act to cause death, commits the offence of culpable homicide. Punishment: Imprisonment not exceeding 10 years, or life imprisonment, or fine (not amounting to murder).",
+        "amendments": []
+      },
+      {
+        "section": "103",
+        "title": "Punishment for murder",
+        "text": "Whoever commits murder shall be punished with death, or imprisonment for life, and shall also be liable to fine. Exception — if committed in provocation, punishment reduced under culpable homicide.",
+        "amendments": []
+      },
+      {
+        "section": "316",
+        "title": "Cheating",
+        "text": "Whoever, by deceiving any person, fraudulently or dishonestly induces the person so deceived to deliver any property to any person, or to consent that any person shall retain any property, or intentionally induces the person so deceived to do or omit to do anything which he would not do or omit if he were not so deceived, shall be punished with imprisonment of either description for a term which may extend to three years, or with fine, or with both.",
+        "amendments": []
+      },
+      {
+        "section": "318",
+        "title": "Cheating by personation",
+        "text": "A person is said to 'cheat by personation' if he cheats by pretending to be some other person, or by knowingly substituting one person for another. Punishment: Imprisonment not exceeding five years, or with fine, or with both.",
+        "amendments": []
+      }
+    ]
+  },
+  {
+    "name": "Bharatiya Nagarik Suraksha Sanhita 2023",
+    "year": "2023",
+    "category": "Criminal Procedure",
+    "description": "Replaced the Code of Criminal Procedure 1973. Came into force on 1 July 2024. Introduces timelines for trial, witness protection, use of audio-video means, and Zero FIR provisions.",
+    "amendments": [],
+    "sections": [
+      {
+        "section": "173",
+        "title": "FIR and information to police",
+        "text": "Every information relating to the commission of a cognisable offence may be given orally or in writing to an officer in charge of a police station. If given orally it shall be reduced to writing by such officer. Every such information shall be signed by the person giving it. A copy of the FIR shall be given forthwith to the informant free of cost. Zero FIR may be registered at any police station irrespective of jurisdiction and transferred to the concerned station.",
+        "amendments": []
+      },
+      {
+        "section": "258",
+        "title": "Charge",
+        "text": "Every charge under this Sanhita shall state the offence with which the accused is charged. If the law creating the offence gives it any specific name, the offence may be described in the charge by that name only. The charge shall contain such particulars as to the time and place of the alleged offence and the person against whom it was committed.",
+        "amendments": []
+      },
+      {
+        "section": "479",
+        "title": "Bail in non-bailable offences",
+        "text": "When any person accused of any non-bailable offence is arrested or detained without warrant, he may be released on bail, but he shall not be so released if there appear reasonable grounds for believing that he has been guilty of an offence punishable with death or imprisonment for life.",
+        "amendments": []
+      }
+    ]
+  },
+  {
+    "name": "Bharatiya Sakshya Adhiniyam 2023",
+    "year": "2023",
+    "category": "Evidence Law",
+    "description": "Replaced the Indian Evidence Act 1872. Came into force on 1 July 2024. Modernises evidence law to include electronic and digital records, updates definitions, and streamlines rules on admissibility.",
+    "amendments": [],
+    "sections": [
+      {
+        "section": "2(1)(e)",
+        "title": "Definition of 'Electronic record'",
+        "text": "Has the meaning assigned to it in the Information Technology Act 2000. Includes data, record or data generated, image or sound stored, received or sent in an electronic form, a microfilm, computer generated microfiche, and documents stored in cloud or server.",
+        "amendments": []
+      },
+      {
+        "section": "23",
+        "title": "Admissions",
+        "text": "An admission is a statement, oral or documentary or contained in electronic form, which suggests any inference as to any fact in issue or relevant fact, and which is made by any of the persons and under the circumstances mentioned in the Act.",
+        "amendments": []
+      },
+      {
+        "section": "57",
+        "title": "Proof of electronic record",
+        "text": "The contents of electronic records may be proved in accordance with the provisions of this section. In any proceedings involving a secure electronic record, the court may presume that the electronic record has not been altered since the specific point of time to which the secure status relates.",
+        "amendments": []
+      },
+      {
+        "section": "63",
+        "title": "Secondary evidence",
+        "text": "Secondary evidence includes certified copies given under the provisions of the Act; copies made from originals by mechanical processes; counterparts of documents against the parties who did not execute them; oral accounts of the contents of documents given by some person who has himself seen it.",
+        "amendments": []
+      }
+    ]
+  },
+  {
+    "name": "Indian Contract Act 1872 — Special Contracts",
+    "year": "1872",
+    "category": "Contract Law",
+    "description": "Chapters VIII to X of the Indian Contract Act covering Indemnity and Guarantee (s.124-147), Bailment and Pledge (s.148-181), and Agency (s.182-238).",
+    "amendments": [],
+    "sections": [
+      {
+        "section": "124",
+        "title": "Contract of indemnity defined",
+        "text": "A contract by which one party promises to save the other from loss caused to him by the conduct of the promisor himself, or by the conduct of any other person, is called a 'contract of indemnity'.",
+        "amendments": []
+      },
+      {
+        "section": "126",
+        "title": "Contract of guarantee",
+        "text": "A 'contract of guarantee' is a contract to perform the promise, or discharge the liability, of a third person in case of his default. The person who gives the guarantee is called the 'surety'; the person in respect of whose default the guarantee is given is called the 'principal debtor'; and the person to whom the guarantee is given is called the 'creditor'.",
+        "amendments": []
+      },
+      {
+        "section": "182",
+        "title": "Agent and principal defined",
+        "text": "An 'agent' is a person employed to do any act for another, or to represent another in dealings with third persons. The person for whom such act is done, or who is so represented, is called the 'principal'.",
+        "amendments": []
+      }
+    ]
+  }
+]

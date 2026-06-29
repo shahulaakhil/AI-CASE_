@@ -1,0 +1,10 @@
+.env
+__pycache__/
+*.pyc
+*.pyo
+.streamlit/secrets.toml
+# data/court_cases.json
+*.pdf
+*.docx
+output/
+uploads/

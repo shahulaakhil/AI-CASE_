@@ -606,5 +606,3 @@ Since this project does not contain a complete database of Indian law, the follo
 ---
 
 *This README was generated after a full code audit of the project. All claims about what is and is not present in the codebase are based on direct inspection of the source files and data files.*
-#   L i t i g a t A I  
- 
