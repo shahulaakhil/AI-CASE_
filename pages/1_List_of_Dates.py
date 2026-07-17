@@ -6,8 +6,8 @@ import streamlit as st
 import pandas as pd
 from io import BytesIO
 
-st.set_page_config(page_title="List of Dates", page_icon="📅", layout="wide")
-st.title("📅 List of Dates Generator")
+st.set_page_config(page_title="List of Dates", page_icon="📆", layout="wide")
+st.title("📆 List of Dates Generator")
 st.caption("Upload case files, pleadings, FIRs, or judgments — get a court-ready chronological table.")
 
 uploaded = st.file_uploader(

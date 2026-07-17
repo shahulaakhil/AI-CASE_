@@ -6,8 +6,8 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime, date
 
-st.set_page_config(page_title="Court Tracker", page_icon="🗓️", layout="wide")
-st.title("🗓️ Court Date & Case Status Tracker")
+st.set_page_config(page_title="Court Tracker", page_icon="🏛️", layout="wide")
+st.title("🏛️ Court Date & Case Status Tracker")
 st.caption("Track all your cases, hearing dates, and court status — with eCourts integration.")
 
 from core.court_tracker import (
@@ -75,39 +75,41 @@ with tab1:
 
 with tab2:
     st.subheader("Add New Case")
-    with st.form("add_case_form"):
-        case_name = st.text_input("Case Name *", placeholder="ABC vs XYZ")
-        col1, col2 = st.columns(2)
-        with col1:
-            court_name = st.text_input("Court / Forum *", placeholder="High Court of Delhi")
-            case_number = st.text_input("Case Number", placeholder="CS(OS) 123/2024")
-        with col2:
-            cnr = st.text_input("CNR Number", placeholder="DLHC01234562024")
-            parties = st.text_input("Parties", placeholder="Petitioner, Respondent")
-        next_d = st.date_input("Next Hearing Date")
-        notes = st.text_area("Notes", height=80)
 
-        # eCourts fetch option
-        st.markdown("**Or fetch status from eCourts:**")
-        cnr_fetch = st.text_input("Enter CNR to look up", key="cnr_lookup")
-        if st.form_submit_button("Fetch from eCourts"):
-            if cnr_fetch:
-                with st.spinner("Fetching..."):
-                    result = fetch_ecourts_status(cnr_fetch)
-                if "error" in result:
-                    st.warning(result["error"])
-                else:
-                    st.json(result)
-                    st.info("Review the data above and fill the form accordingly.")
+    case_name = st.text_input("Case Name *", placeholder="ABC vs XYZ")
+    col1, col2 = st.columns(2)
+    with col1:
+        court_name = st.text_input("Court / Forum *", placeholder="High Court of Delhi")
+        case_number = st.text_input("Case Number", placeholder="CS(OS) 123/2024")
+    with col2:
+        cnr = st.text_input("CNR Number", placeholder="DLHC01234562024")
+        parties = st.text_input("Parties", placeholder="Petitioner, Respondent")
+    next_d = st.date_input("Next Hearing Date")
+    notes = st.text_area("Notes", height=80)
 
-        submitted = st.form_submit_button("Add Case", type="primary")
-        if submitted:
-            if not case_name or not court_name:
-                st.error("Case Name and Court are required.")
+    # eCourts fetch option (separate button — no form)
+    st.markdown("**Or fetch status from eCourts first:**")
+    cnr_fetch = st.text_input("Enter CNR to look up", key="cnr_lookup")
+    if st.button("🔍 Fetch from eCourts"):
+        if cnr_fetch:
+            with st.spinner("Fetching..."):
+                ecourts_result = fetch_ecourts_status(cnr_fetch)
+            if "error" in ecourts_result:
+                st.warning(ecourts_result["error"])
             else:
-                add_case(case_name, court_name, case_number, cnr, parties, str(next_d), notes)
-                st.success(f"Case '{case_name}' added!")
-                st.rerun()
+                st.json(ecourts_result)
+                st.info("Review the data above and fill the fields accordingly.")
+        else:
+            st.warning("Enter a CNR number first.")
+
+    st.markdown("---")
+    if st.button("✅ Add Case", type="primary"):
+        if not case_name or not court_name:
+            st.error("Case Name and Court are required.")
+        else:
+            add_case(case_name, court_name, case_number, cnr, parties, str(next_d), notes)
+            st.success(f"Case '{case_name}' added!")
+            st.rerun()
 
 with tab3:
     st.subheader("Upcoming Hearings")

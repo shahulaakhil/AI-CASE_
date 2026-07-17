@@ -27,7 +27,7 @@
 | **Platform** | Streamlit multi-page web app |
 | **Primary LLM** | Google Gemini 2.5 Flash |
 | **Fast/Routing LLM** | Groq Llama 3.3 70B |
-| **Fallback LLM** | Siemens OpenAI-compatible API (`gpt-oss-120b-onprem`) |
+| **Fallback LLM** | OpenAI API (`gpt-oss-120b-onprem`) |
 | **Case Law Source** | Indian Kanoon API (live) |
 | **Court Status Source** | eCourts (ecourts.gov.in) via public API |
 | **Hardcoded Legal Data** | 10 Indian Acts, ~60 key sections (see §5) |
@@ -59,7 +59,7 @@
               │  ┌──────────────┐  │
               │  │ Gemini 2.5F  │  │  ← primary (text + vision)
               │  │ Groq Llama3.3│  │  ← routing / fast classification
-              │  │ Siemens GPT  │  │  ← fallback on Gemini 429
+              │  │ OpenAI GPT   │  │  ← fallback on Gemini 429
               │  └──────────────┘  │
               └──────────┬─────────┘
                          │
@@ -77,14 +77,14 @@
 1. User uploads a file or types a query in a Streamlit page
 2. Page calls the relevant `core/` module
 3. Core module extracts text (via `utils/pdf_utils.py`) and/or calls the Kanoon API (via `utils/kanoon.py`)
-4. `core/llm.py` dispatches to Gemini (primary) → Siemens (fallback on quota exhaustion)
+4. `core/llm.py` dispatches to Gemini (primary) → OpenAI (fallback on quota exhaustion)
 5. Response is rendered in the UI and optionally downloaded as DOCX/CSV
 
 ---
 
 ## 3. The 10 Tools — Detailed
 
-### 📅 Tool 1 — List of Dates
+### 📆 Tool 1 — List of Dates
 **File:** `pages/1_List_of_Dates.py` | **Core:** `core/list_of_dates.py`
 
 Extracts every material date and event from uploaded legal documents and produces a court-ready chronological table.
@@ -100,17 +100,21 @@ Extracts every material date and event from uploaded legal documents and produce
 ### 🔍 Tool 2 — Legal Research Assistant
 **File:** `pages/2_Legal_Research.py` | **Core:** `core/legal_research.py`
 
-Ask any question about Indian law and receive a cited answer backed by actual case law from Indian Kanoon.
+Multi-turn chat interface for Indian legal research — ask follow-up questions and refine answers without restarting the session. Upload a judgment PDF/DOCX to find the exact paragraph that supports or contradicts your argument.
 
+- **Chat interface:** Uses `st.chat_input` — submits on **Enter** (no Ctrl+Enter), works natively on mobile. Full conversation history rendered with `st.chat_message`; follow-ups like "focus more on section 73" work naturally.
 - **Step 1 (Groq):** Intent classification — categorises query as `STATUTE`, `CASE_LAW`, `PROCEDURE`, or `GENERAL`. Extracts jurisdiction, relevant acts, and builds an optimised short-form Kanoon search query.
 - **Step 2 (Kanoon API):** Live search returns up to 10 relevant judgments with citations, bench, and publication date.
 - **Step 3 (Gemini):** Synthesis — structures a full answer with inline citations to Kanoon results. Falls back to AI legal knowledge for general principles where Kanoon results are tangential.
-- **Integration with Tool 5:** The Prompt Enhancer can pre-fill this tool's query field.
-- **Kanoon results displayed:** Title, citation, bench, headline snippet, link to full document
+- **Document upload + paragraph Q&A:** Upload any PDF, DOCX, or TXT judgment. Ask "which paragraph supports my argument about damages?" — Gemini returns exact paragraph numbers labelled SUPPORTS / CONTRADICTS / CONTEXT. Prior Q&A on the same document is passed as context for coherent multi-turn follow-ups.
+- **File caching:** Uploaded file bytes are stored in `st.session_state` so asking multiple questions about the same document does not require re-uploading.
+- **Integration with Tool 5:** The Prompt Enhancer's "Send to Legal Research" button navigates here and shows the enhanced prompt in a copy-able block above the chat.
+- **Kanoon results displayed:** Title, citation, bench, headline snippet
+- **Sidebar controls:** Max results slider (1–10), Clear conversation button, Prompt Enhancement expander
 
 ---
 
-### ⚖️ Tool 3 — Authority Check
+### ✅ Tool 3 — Authority Check
 **File:** `pages/3_Authority_Check.py` | **Core:** `core/authority_check.py`
 
 Verifies whether a cited Indian judgment is still authoritative — or has been overruled, distinguished, or limited.
@@ -146,7 +150,7 @@ Handles legal documents in any Indian language — extracts text, translates to 
 
 ---
 
-### ✨ Tool 5 — Prompt Enhancer
+### 💡 Tool 5 — Prompt Enhancer
 **File:** `pages/5_Prompt_Enhancer.py` | **Core:** `core/prompt_enhancer.py`
 
 Transforms a rough lawyer's query into a structured, high-quality LLM prompt for better research outcomes.
@@ -154,47 +158,52 @@ Transforms a rough lawyer's query into a structured, high-quality LLM prompt for
 - **Input:** Raw legal question (e.g., "can consumer file complaint against builder for delay")
 - **Classification (Groq):** Legal area assigned from: `CONSTITUTIONAL`, `CONTRACT`, `CRIMINAL`, `CIVIL_PROCEDURE`, `CONSUMER`, `PROPERTY`, `FAMILY`, `ARBITRATION`, `LABOUR`, `TAX`, `IP`, `CORPORATE`, `BANKING`, `GENERAL`
 - **Output:** Structured prompt with: Legal Area, Jurisdiction (state/HC/SC), Relevant Acts, Specific Question, Key Concepts, Desired Output Format
-- **Integration:** "Send to Legal Research" button pre-fills Tool 2's query field via `st.session_state`
+- **Integration:** "Send to Legal Research" button navigates to Tool 2 and displays the enhanced prompt in a copy-able code block at the top of the chat — paste it into the chat input to research immediately
 
 ---
 
-### 📝 Tool 6 — Document Drafter
+### 📋 Tool 6 — Document Drafter
 **File:** `pages/6_Document_Drafter.py` | **Core:** `core/doc_drafter.py`
 
-Drafts Indian legal documents with auto-generated inline citations.
+Drafts Indian legal documents with auto-generated inline citations in professional court/arbitration format.
 
 **Supported document types:**
 | Document | When Used |
 |----------|-----------|
-| Suit (Plaint) | Civil suit to initiate proceedings |
-| Statement of Claims | Consumer forum / arbitration claims |
-| Written Statement | Defendant's reply to plaint |
-| Rejoinder | Plaintiff's reply to Written Statement |
-| Vakalatnama | Advocate's authority to appear |
-| Counter-claim | Defendant's independent claim |
-| Application / Interlocutory | IA/MA within a pending suit |
-| Legal Notice | Pre-litigation notice under s. 80 CPC etc. |
+| Suit (Plaint) | Civil suit to initiate proceedings in a Civil Court |
+| Statement of Claims | Arbitration claims under the A&C Act 1996 |
+| Written Statement | Defendant's reply to plaint (Order VIII CPC) |
+| Statement of Defense | Respondent's reply in arbitration |
+| Rejoinder | Claimant/Plaintiff's reply to Written Statement / SoD |
+| Vakalatnama | Advocate's power of attorney to appear |
+| Counter-Claim | Defendant's independent claim (Order VIII Rule 6A CPC) |
+| Application / Misc. Petition | Interlocutory application within a pending suit |
 
-- **Inline citations:** Gemini marks `[CITE: Act s.XX]` and `[CITE: CaseName]` throughout the draft — these are then extracted and displayed as a separate reference list
-- **Court-ready format:** Proper cause title, paragraph numbering, prayer clause
+**Professional formatting (updated):**
+- **Arbitration documents** (Statement of Claims, SoD, Rejoinder): decimal paragraph numbering `1.1`, `1.2`, `2.1`, `2.2` under Roman-numeral section headings (`I. INTRODUCTION`, `II. PRELIMINARY SUBMISSIONS`, `A.` / `B.` sub-headings)
+- **Court filings** (Plaint, Written Statement, etc.): plain Arabic numbered paragraphs `1.`, `2.`, `3.` — each beginning with `That…`
+- **Defined terms:** First-reference definitions — `"ABC Ltd. (hereinafter 'the Claimant')"` — used consistently
+- **Annexure cross-references:** `[Annexure A]`, `[Annexure C-5]` in body; ANNEXURES list at the end
+- **Inline citations:** `[CITE: Act s.XX]`, `[CITE: Case Name (Year) Citation]`, `[CITE: verify — description]` — extracted into a separate panel after drafting
+- **Professional closing block:** `Filed through: [Counsel], Date, Place`
 - **Download:** As formatted DOCX via `utils/docx_utils.py`
 
 ---
 
-### 🗓️ Tool 7 — Court Date & Case Status Tracker
+### 🏛️ Tool 7 — Court Date & Case Status Tracker
 **File:** `pages/7_Court_Tracker.py` | **Core:** `core/court_tracker.py`
 
 Manages your entire case docket in one place.
 
 - **Local storage:** Cases stored in `data/court_cases.json` (persists between sessions)
-- **eCourts integration:** Enter a CNR (Case Number Record) → fetches live status from `services.ecourts.gov.in/ecourtindia_v6/cases/case_status_cnr`
+- **eCourts integration:** Enter a CNR (Case Number Record) → fetches live status from `services.ecourts.gov.in/ecourtindia_v6/cases/case_status_cnr`. Uses plain buttons — no keyboard-submit shortcut (Ctrl+Enter) in this tab.
 - **Fields tracked:** Case name, case number, CNR, court, client, case type, status, hearing dates, notes, filing date
 - **Dashboard:** Homepage widget shows all hearings within 7 days with colour-coded urgency (red ≤2 days, orange ≤5, green otherwise)
 - **Manual fallback:** If eCourts API is unavailable, all data can be entered manually
 
 ---
 
-### 📖 Tool 8 — Judgment Summariser
+### 📑 Tool 8 — Judgment Summariser
 **File:** `pages/8_Judgment_Summariser.py` | **Core:** `core/judgment_summariser.py`
 
 Converts a full judgment (any length, any format) into a structured legal brief.
@@ -216,7 +225,7 @@ Converts a full judgment (any length, any format) into a structured legal brief.
 
 ---
 
-### 📚 Tool 9 — Bare Acts & Amendments Tracker
+### 📖 Tool 9 — Bare Acts & Amendments Tracker
 **File:** `pages/9_Bare_Acts.py` | **Core:** `core/bare_acts.py`
 
 Browse and search Indian legislation with amendment history.
@@ -231,7 +240,7 @@ Browse and search Indian legislation with amendment history.
 
 ---
 
-### ⚔️ Tool 10 — Counter Arguments Drafter
+### 🛡️ Tool 10 — Counter Arguments Drafter
 **File:** `pages/10_Counter_Arguments.py` | **Core:** `core/counter_args.py`
 
 A 4-step wizard that reads the opponent's pleading and drafts a complete Written Statement.
@@ -283,7 +292,7 @@ This file is a manually curated snapshot of selected provisions from 10 Indian A
 | **Indian Kanoon API** (`api.indiankanoon.org`) | Full-text search of Supreme Court, High Court, and Tribunal judgments; case documents; citation relationships (`citedby:`) | Requires `INDIAN_KANOON_API_TOKEN` (register at api.indiankanoon.org) | Without token → mock/placeholder results. With token → millions of real judgments |
 | **eCourts** (`services.ecourts.gov.in`) | Live case status, next date, court, bench — for any case with a CNR number | No auth required (public endpoint) | Can return HTTP 400 for invalid CNR; occasional downtime |
 
-### C. AI Model Knowledge (Gemini / Groq / Siemens)
+### C. AI Model Knowledge (Gemini / Groq / OpenAI)
 
 These models have broad legal knowledge from their training data, which includes:
 - Indian statutes (IPC, ICA, CPC, Constitution, etc.)
@@ -354,8 +363,8 @@ These models have broad legal knowledge from their training data, which includes
 - **Model ID:** `gemini-2.5-flash`
 - **Used for:** All synthesis, drafting, translation, summarisation, JSON structured output
 - **Vision capability:** `gemini_vision()` — used for OCR on scanned PDFs and image-based DOCX
-- **Rate limits (free tier):** 20 requests/day. After exhaustion, automatically falls back to Siemens API.
-- **Quota handling:** Parses the `retry in Xs` delay from 429 error messages; sleeps and retries up to 3 times; then falls back to Siemens.
+- **Rate limits (free tier):** 20 requests/day. After exhaustion, automatically falls back to OpenAI API.
+- **Quota handling:** Parses the `retry in Xs` delay from 429 error messages; sleeps and retries up to 3 times; then falls back to OpenAI.
 
 ### Fast/Routing LLM — Groq Llama 3.3 70B
 
@@ -364,10 +373,10 @@ These models have broad legal knowledge from their training data, which includes
 - **Used for:** Intent classification (Legal Research routing), legal area classification (Prompt Enhancer), Kanoon query building — tasks where speed matters more than depth
 - **Rate limits:** Groq free tier is generous (~14,400 tokens/minute). Unlikely to be exhausted in normal use.
 
-### Fallback LLM — Siemens OpenAI-compatible API
+### Fallback LLM — OpenAI API
 
 - **SDK:** `openai` (OpenAI Python SDK, `base_url` overridden)
-- **Base URL:** `https://api.siemens.com/llm/v1`
+- **Base URL:** `https://api.openai.com/v1`
 - **Model ID:** `gpt-oss-120b-onprem`
 - **Used for:** Automatic fallback when Gemini hits daily quota limit
 - **Capability:** Text generation only — **no vision/OCR capability**. OCR-dependent tools (scanned PDFs) will fail if Gemini quota is exhausted.
@@ -403,7 +412,7 @@ These models have broad legal knowledge from their training data, which includes
 - A Google Gemini API key ([aistudio.google.com](https://aistudio.google.com))
 - A Groq API key ([console.groq.com](https://console.groq.com))
 - (Optional) Indian Kanoon API token ([api.indiankanoon.org](https://api.indiankanoon.org))
-- (Optional) Siemens API key for fallback
+- (Optional) OpenAI API key for fallback
 
 ### Installation
 
@@ -434,7 +443,7 @@ The app opens at `http://localhost:8501` by default.
 - [ ] `GOOGLE_API_KEY` set — required for all AI features
 - [ ] `GROQ_API_KEY` set — required for routing/classification
 - [ ] `INDIAN_KANOON_API_TOKEN` set — required for live case law in Tools 2 & 3
-- [ ] `SIEMENS_API_KEY` set — optional, enables fallback when Gemini quota exhausted
+- [ ] `OPEN_AI_API_KEY` set — optional, enables fallback when Gemini quota exhausted
 - [ ] Upload a PDF or DOCX to test Tool 1 (List of Dates)
 
 ---
@@ -463,10 +472,10 @@ GROQ_API_KEY=your_groq_api_key_here
 # Without this, Tools 2 & 3 use only AI knowledge — no verified citations
 INDIAN_KANOON_API_TOKEN=your_kanoon_token_here
 
-# Siemens OpenAI-compatible fallback (when Gemini daily quota exhausted)
-SIEMENS_API_KEY=your_siemens_key_here
-SIEMENS_BASE_URL=https://api.siemens.com/llm/v1
-SIEMENS_MODEL=gpt-oss-120b-onprem
+# OpenAI fallback (when Gemini daily quota exhausted)
+OPEN_AI_API_KEY=your_open_ai_key_here
+OPEN_AI_BASE_URL=https://api.openai.com/v1
+OPEN_AI_MODEL=gpt-oss-120b-onprem
 
 # ──────────────────────────────────────────
 # MODEL OVERRIDES (optional)
@@ -504,7 +513,7 @@ law-project/
 │
 ├── core/                         # Business logic (no UI imports)
 │   ├── config.py                 # Env loading, path constants
-│   ├── llm.py                    # Gemini / Groq / Siemens clients + retry/fallback
+│   ├── llm.py                    # Gemini / Groq / OpenAI clients + retry/fallback
 │   ├── list_of_dates.py          # Tool 1 logic
 │   ├── legal_research.py         # Tool 2 logic
 │   ├── authority_check.py        # Tool 3 logic
@@ -547,8 +556,8 @@ law-project/
 
 | Limitation | Impact |
 |-----------|--------|
-| Gemini free tier: 20 requests/day | Platform will exhaust quota quickly in a demo or heavy-use session. Set `SIEMENS_API_KEY` for fallback. |
-| Siemens fallback: text only | Vision/OCR (scanned PDFs, image DOCX) requires Gemini. If Gemini quota is exhausted, OCR-dependent tools will error. |
+| Gemini free tier: 20 requests/day | Platform will exhaust quota quickly in a demo or heavy-use session. Set `OPEN_AI_API_KEY` for fallback. |
+| OpenAI fallback: text only | Vision/OCR (scanned PDFs, image DOCX) requires Gemini. If Gemini quota is exhausted, OCR-dependent tools will error. |
 | Kanoon token required for live case law | Without token, Tools 2 & 3 return no real judgments — only AI knowledge |
 | eCourts API: public, no SLA | Can go down or return 400/503. Only covers courts on the eCourts platform. |
 | Indian Kanoon coverage | Not every HC/District Court judgment is indexed. Tribunal coverage varies. |
@@ -570,7 +579,7 @@ law-project/
 | Package | Version | Purpose |
 |---------|---------|---------|
 | `streamlit` | ≥1.35.0 | Web UI framework |
-| `openai` | ≥1.30.0 | Siemens fallback LLM (OpenAI-compatible) |
+| `openai` | ≥1.30.0 | OpenAI fallback LLM |
 | `google-genai` | ≥0.8.0 | Gemini 2.5 Flash (primary LLM + Vision OCR) |
 | `groq` | ≥0.9.0 | Groq Llama 3.3 70B (fast routing) |
 | `python-dotenv` | ≥1.0.0 | `.env` file loading |

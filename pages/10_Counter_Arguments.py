@@ -4,8 +4,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import streamlit as st
 
-st.set_page_config(page_title="Counter Arguments", page_icon="⚔️", layout="wide")
-st.title("⚔️ Counter Arguments Drafter")
+st.set_page_config(page_title="Counter Arguments", page_icon="🛡️", layout="wide")
+st.title("🛡️ Counter Arguments Drafter")
 st.caption("Upload opposing party's claim document → extract claims → draft counter-arguments with inline citations → assemble Written Statement.")
 
 from core.counter_args import (

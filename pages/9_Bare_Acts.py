@@ -4,8 +4,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import streamlit as st
 
-st.set_page_config(page_title="Bare Acts", page_icon="📚", layout="wide")
-st.title("📚 Bare Acts & Amendments Tracker")
+st.set_page_config(page_title="Bare Acts", page_icon="📖", layout="wide")
+st.title("📖 Bare Acts & Amendments Tracker")
 st.caption("Browse Indian legislation, view sections with amendment history, and Ask AI about any provision.")
 
 from core.bare_acts import list_acts, get_act_sections, search_sections, ask_provision, get_amendments_for_act

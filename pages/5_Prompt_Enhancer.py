@@ -4,8 +4,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import streamlit as st
 
-st.set_page_config(page_title="Prompt Enhancer", page_icon="✨", layout="wide")
-st.title("✨ Prompt Enhancement")
+st.set_page_config(page_title="Prompt Enhancer", page_icon="💡", layout="wide")
+st.title("💡 Prompt Enhancement")
 st.caption("Lawyers think in facts and disputes. This tool transforms your raw question into a structured LLM instruction for optimal AI responses.")
 
 raw_query = st.text_area(

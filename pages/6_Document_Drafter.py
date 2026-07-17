@@ -4,8 +4,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import streamlit as st
 
-st.set_page_config(page_title="Document Drafter", page_icon="📝", layout="wide")
-st.title("📝 Legal Document Drafter")
+st.set_page_config(page_title="Document Drafter", page_icon="📋", layout="wide")
+st.title("📋 Legal Document Drafter")
 st.caption("Draft court-ready Indian legal documents with automatic inline citations.")
 
 from core.doc_drafter import DOC_TYPES, draft_document, extract_citations

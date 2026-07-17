@@ -4,8 +4,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import streamlit as st
 
-st.set_page_config(page_title="Judgment Summariser", page_icon="📖", layout="wide")
-st.title("📖 Judgment Summariser")
+st.set_page_config(page_title="Judgment Summariser", page_icon="📑", layout="wide")
+st.title("📑 Judgment Summariser")
 st.caption("Upload any Indian court judgment and get a structured brief: Facts → Issues → Held → Ratio → Significance.")
 
 uploaded = st.file_uploader(

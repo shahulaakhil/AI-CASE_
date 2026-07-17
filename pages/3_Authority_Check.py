@@ -4,8 +4,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import streamlit as st
 
-st.set_page_config(page_title="Authority Check", page_icon="⚖️", layout="wide")
-st.title("⚖️ Authority Check")
+st.set_page_config(page_title="Authority Check", page_icon="✅", layout="wide")
+st.title("✅ Authority Check")
 st.caption("Is your cited judgment still good law? Find out if it's been overruled, distinguished, or affirmed.")
 
 STATUS_COLORS = {
