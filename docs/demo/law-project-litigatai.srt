@@ -1,0 +1,74 @@
+1
+00:00:00,000 --> 00:00:30,409
+LitigatAI, an AI workbench for Indian litigation
+Eleven tools over one document set: chronology, judgment briefs, authority checks, cited research, drafting and a hearing diary. FastAPI, a no build front end, and free to host.
+
+2
+00:00:30,409 --> 00:00:51,429
+Bring your own API key
+The deployment need hold no key at all. A visitor pastes their own, it is tested against the provider before being accepted, kept in their browser, and used only for their own requests.
+
+3
+00:00:51,429 --> 00:01:10,351
+Four providers, live model lists, switched on the spot
+Gemini, Groq, OpenAI and Hugging Face. Each is asked what it can actually serve, so a retired model drops out on its own. Switching to Groq here, and every tool that follows runs on it.
+
+4
+00:01:10,351 --> 00:01:37,522
+List of Dates, from a real PDF brief
+A works contract dispute uploaded as a PDF. PyMuPDF pulls the text server side, then the model returns a filing ready chronology with every entry tied back to the document.
+
+5
+00:01:37,522 --> 00:02:01,371
+Judgment Summariser
+A Supreme Court arbitration judgment in, a structured brief out: facts, issues, what was held, the ratio and why it matters. Argue from this rather than re-reading forty paragraphs.
+
+6
+00:02:01,371 --> 00:02:23,923
+Authority Check
+Before you cite it, find out whether it is still good law. The tool reports whether a judgment has been followed, distinguished, doubted or overruled, and by whom.
+
+7
+00:02:23,923 --> 00:02:45,378
+Translate and OCR
+A consumer complaint filed in Hindi, uploaded as a DOCX. The language is detected and the document is translated into English with the statutory references and the figures intact. A scanned page goes to a vision model.
+
+8
+00:02:45,378 --> 00:03:10,128
+Legal Research
+An Indian law question answered with citations, and with live Indian Kanoon retrieval when a token is configured. The answer names the sections and judgments it relies on.
+
+9
+00:03:10,128 --> 00:03:33,164
+Prompt Enhancer
+A rough question becomes a structured research instruction: the issues named, the statutes to check listed, the output format specified. Better prompt, better answer, and it hands straight to research.
+
+10
+00:03:33,164 --> 00:03:56,061
+Bare Acts, browse and amendments
+Eleven statutes indexed section by section, including the Consumer Protection Act 2019 and the new criminal codes, each section carrying the amendments that changed it. This data ships with the repository.
+
+11
+00:03:56,061 --> 00:04:24,056
+Bare Acts, question a provision
+Pick an Act and a section, then ask about it. The section text is quoted back and the answer is confined to that provision, which keeps it grounded rather than drifting into general commentary.
+
+12
+00:04:24,056 --> 00:04:58,065
+Document Drafter
+Brief the drafter on the matter and it produces a court ready pleading with citations marked inline, exportable as DOCX or PDF. Nine document types, from a plaint to an arbitration statement of claim.
+
+13
+00:04:58,065 --> 00:05:27,311
+Counter Arguments
+Upload the other side's written statement. Every distinct claim is pulled out so each can be answered on its own, then rebutted and assembled into a written statement.
+
+14
+00:05:27,311 --> 00:05:59,126
+Court Tracker
+Every matter with its next date in one diary, an overdue flag, hearing outcomes logged per case, CSV export and an eCourts CNR lookup. Seeded here with five sample matters so a fresh deployment is never a blank screen.
+
+15
+00:05:59,126 --> 00:06:17,944
+Free to host, and nobody pays for anyone else
+One FastAPI service inside 512 MB, a statute index committed to the repository, seeded demo data, and every provider key supplied by whoever is using it. That is the whole hosting bill.

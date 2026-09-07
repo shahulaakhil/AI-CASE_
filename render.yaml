@@ -1,0 +1,64 @@
+# Render blueprint for LitigatAI.
+# Deploy with: New > Blueprint, and point Render at this repository.
+#
+# This assumes law-project-hoster is the root of the repository you push.
+# If you instead keep it as a subfolder of a larger repository, add the line
+#   rootDir: law-project-hoster
+# under the service below, so Render builds from the right directory.
+services:
+  - type: web
+    name: litigatai
+    runtime: python
+    plan: free
+    region: singapore
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 1 --timeout-keep-alive 65
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      - key: ENVIRONMENT
+        value: production
+      # Bring your own key is on by default, so NO provider key is required
+      # here: the deployment boots with none and each visitor pastes their own
+      # in the API keys panel. Set one anyway only if you want to pay for every
+      # visitor's inference yourself.
+      # sync: false means Render asks you for the value and never copies it
+      # between accounts or from the repository.
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: HUGGINGFACE_API_KEY
+        sync: false
+      # Cloudflare Workers AI needs both halves: the account id is part of the
+      # request URL, so the token alone addresses nothing.
+      - key: CLOUDFLARE_API_TOKEN
+        sync: false
+      - key: CLOUDFLARE_ACCOUNT_ID
+        sync: false
+      # Optional. Adds live Indian case law retrieval.
+      - key: INDIAN_KANOON_API_TOKEN
+        sync: false
+      # Optional. Set this to a Postgres connection string to keep the case
+      # tracker between deploys. Without it the tracker uses SQLite on the
+      # ephemeral Render disk.
+      - key: DATABASE_URL
+        sync: false
+      # 1 accepts visitor supplied keys, 0 refuses them and uses only the keys
+      # set above.
+      - key: ALLOW_CLIENT_KEYS
+        value: "1"
+      # 1 seeds five sample matters into an empty case tracker at start up, so
+      # a demo deployment is not a blank diary. Free Render has an ephemeral
+      # disk, so this re-seeds on every restart. Leave it off, and set
+      # DATABASE_URL instead, for a deployment holding real matters.
+      - key: DEMO_SEED
+        value: "1"
+      - key: MAX_UPLOAD_MB
+        value: "25"
+      - key: MAX_OCR_PAGES
+        value: "8"

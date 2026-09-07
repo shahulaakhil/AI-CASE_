@@ -1,0 +1,1 @@
+"""LitigatAI application package."""
