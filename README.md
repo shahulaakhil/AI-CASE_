@@ -11,16 +11,18 @@ step, no Node toolchain, no database server required.
 
 ## Demo
 
-A full walkthrough of every feature, captioned. Nothing is mocked: every answer
-on screen came back from a live model during the recording.
+![Demo highlights](docs/demo/law-project-preview.gif)
 
-[![Watch the 6m 17s walkthrough](docs/demo/law-project-poster.png)](docs/demo/law-project-litigatai.mp4)
+Highlights from the full walkthrough, looping. Nothing here is mocked: every
+answer on screen came back from a live model while the recording was running.
 
-**[Watch the walkthrough, 6m 17s](docs/demo/law-project-litigatai.mp4)** &nbsp;·&nbsp;
-[Captions (.srt)](docs/demo/law-project-litigatai.srt)
+**Full walkthrough, 6m 17s, all 15 steps captioned:**
+[law-project-litigatai.mp4](docs/demo/law-project-litigatai.mp4) (6.2 MB)
+&nbsp;·&nbsp;
+[captions (.srt)](docs/demo/law-project-litigatai.srt)
 
-> GitHub opens the file in its own video player. To download it instead, use
-> the **Raw** button on that page.
+> GitHub cannot play a committed mp4 inline, so that link downloads the file
+> rather than streaming it. The GIF above is the inline preview.
 
 ---
 
