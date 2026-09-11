@@ -373,12 +373,13 @@ legal_basis   the statute, contractual clause or doctrine relied on
 key_facts     the facts pleaded in support, with dates and figures where given
 strength      STRONG, MODERATE or WEAK, judged as an opponent would judge it
 
-Do not merge distinct claims. Do not invent claims that are not pleaded."""
+Do not merge distinct claims. Do not invent claims that are not pleaded.
+Put every claim in one single array. Never stop after the first claim."""
 
-_EXTRACT_SHAPE = """[
+_EXTRACT_SHAPE = """{"items": [
   {"claim_id": "C1", "claim": "", "legal_basis": "", "key_facts": "",
    "strength": "STRONG | MODERATE | WEAK"}
-]"""
+]}"""
 
 _COUNTER_SYSTEM = """You are a senior advocate drafting the response to an opposing claim in
 Indian litigation.
@@ -410,13 +411,14 @@ def extract_claims(
 ) -> list[dict]:
     payload = llm.generate_json(
         "Extract every material claim and legal argument from the pleading below. "
-        f"Return a JSON array.\n\nDOCUMENT:\n{clip(document_text, 60000)}",
+        f"Include every one of them.\n\nDOCUMENT:\n{clip(document_text, 60000)}",
         provider=provider,
         model=model,
         system=_EXTRACT_SYSTEM,
         schema_hint=_EXTRACT_SHAPE,
         temperature=0.1,
         max_tokens=6000,
+        expect_list=True,
     )
 
     if isinstance(payload, dict):

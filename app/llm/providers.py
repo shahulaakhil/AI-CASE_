@@ -7,6 +7,7 @@ google-genai SDK.
 from __future__ import annotations
 
 import base64
+import json
 import re
 import time
 from typing import Any, Sequence
@@ -145,6 +146,24 @@ def _hint_for(message: str, provider_label: str) -> str:
             f"The {provider_label} account has no credit left for inference. "
             "Top the account up, or switch to another provider in the model picker."
         )
+    # A 403 often means the key is fine but the plan or a model agreement is
+    # not, so those cases must not be reported as a bad key.
+    if "not available on" in lowered or "model agreement" in lowered:
+        return (
+            f"Your {provider_label} account cannot call that model. It may need a paid "
+            "plan, or a model agreement you have not accepted yet. Choose another model "
+            "in the picker."
+        )
+    if "413" in lowered or "estimated number of input" in lowered:
+        return (
+            "That model's context window is too small for this request. Choose a model "
+            "with a larger context, or send a shorter document."
+        )
+    if "408" in lowered or "request timeout" in lowered:
+        return (
+            f"{provider_label} timed out on that model. Try again, or pick a faster "
+            "model in the picker."
+        )
     if any(token in lowered for token in ("401", "403", "invalid api key", "unauthor")):
         return (
             f"The {provider_label} API key was rejected. Check that it is the whole key, "
@@ -158,6 +177,39 @@ def _hint_for(message: str, provider_label: str) -> str:
     if "context" in lowered and "length" in lowered:
         return "The document is too long for this model. Try a model with a larger context window."
     return ""
+
+
+def _content_text(content: Any) -> str:
+    """Normalise a chat completion's content into text.
+
+    The OpenAI schema types this as a string, but not every gateway obeys.
+    Cloudflare returns an already parsed object for some models, and the
+    multipart content form arrives as a list of blocks, so both are flattened
+    back to text rather than being allowed to crash on .strip().
+    """
+    if content is None:
+        return ""
+    if isinstance(content, str):
+        return content
+    if isinstance(content, (dict, list)):
+        # A multipart reply is a list of blocks, each carrying its own text.
+        if isinstance(content, list):
+            parts: list[str] = []
+            for block in content:
+                if isinstance(block, str):
+                    parts.append(block)
+                elif isinstance(block, dict):
+                    text = block.get("text") or block.get("content")
+                    if isinstance(text, str):
+                        parts.append(text)
+            if parts:
+                return "\n".join(parts)
+        # Anything else is structured output that was meant to be JSON text.
+        try:
+            return json.dumps(content, ensure_ascii=False)
+        except (TypeError, ValueError):
+            return str(content)
+    return str(content)
 
 
 def _compose_system(system: str | None) -> str:
@@ -345,7 +397,9 @@ class OpenAICompatibleProvider(BaseProvider):
                 response = client.chat.completions.create(**kwargs)
                 choice = response.choices[0] if response.choices else None
                 message_obj = choice.message if choice else None
-                content = (getattr(message_obj, "content", "") if message_obj else "") or ""
+                content = _content_text(
+                    getattr(message_obj, "content", None) if message_obj else None
+                )
                 if content.strip():
                     return sanitise_output(content.strip())
 

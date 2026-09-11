@@ -26,6 +26,57 @@ answer on screen came back from a live model while the recording was running.
 
 ---
 
+## Screenshots
+
+Every image below was captured from the live deployment, not from a mockup.
+
+![The workspace on opening](docs/screenshots/01-dashboard.png)
+
+*Ten tools in the sidebar, with live counts for matters tracked, hearings due
+this week and dates that have already passed.*
+
+![A drafted plaint with its citations](docs/screenshots/04-document-drafter.png)
+
+*A plaint drafted from a paragraph of facts, in Indian court format, with every
+authority it relies on pulled out beside it and clickable through to the
+Authority Check tool.*
+
+![A cited research answer](docs/screenshots/03-legal-research.png)
+
+*A research question answered with a short answer, the statutory position, the
+case law, and the points that still need checking before you rely on them.*
+
+![A judgment turned into a chronology](docs/screenshots/07-list-of-dates.png)
+
+*A judgment in, a filing ready chronology out: ten dated events, each with the
+paragraph it came from and its legal significance.*
+
+![The hearing diary](docs/screenshots/09-court-tracker.png)
+
+*The Court Tracker. One date has already passed and needs an update, one falls
+this week.*
+
+![Five providers in the model picker](docs/screenshots/15-model-picker.png)
+
+*Five AI providers with live model lists. Two are supplied by the host here, and
+the rest switch on the moment a visitor adds their own key.*
+
+<details>
+<summary>The rest of the tools, the light theme and the phone layout</summary>
+
+| | |
+| --- | --- |
+| ![Toolkit](docs/screenshots/02-toolkit.png) The ten tools | ![Judgment Summariser](docs/screenshots/06-judgment-summariser.png) Judgment Summariser |
+| ![Counter Arguments](docs/screenshots/08-counter-arguments.png) Counter Arguments | ![Case detail](docs/screenshots/10-tracker-detail.png) A matter with its hearing history |
+| ![Bare Acts](docs/screenshots/11-bare-acts.png) Bare Acts | ![Authority Check](docs/screenshots/12-authority-check.png) Authority Check |
+| ![Translate and OCR](docs/screenshots/13-translate-ocr.png) Translate and OCR | ![Prompt Enhancer](docs/screenshots/14-prompt-enhancer.png) Prompt Enhancer |
+| ![Bring your own key](docs/screenshots/16-api-keys.png) Bring your own key | ![Light theme](docs/screenshots/17-light-theme.png) The light theme |
+| ![Phone layout](docs/screenshots/18-mobile.png) On a phone | ![Phone navigation](docs/screenshots/19-mobile-nav.png) Phone navigation |
+
+</details>
+
+---
+
 ## Two branches
 
 | Branch | What is on it |
@@ -266,7 +317,7 @@ Then add your keys under Environment.
 | `MAX_OCR_PAGES` | no | Pages sent to a vision model per document, 8 by default |
 | `CORS_ORIGINS` | no | Comma separated origins, only needed for a separate front end |
 
-None of the four provider keys is required any more: with
+None of the five provider keys is required any more: with
 `ALLOW_CLIENT_KEYS` left on, a deployment with no keys at all boots fine and
 asks each visitor for one. A full annotated list is in `.env.example`.
 
@@ -340,9 +391,11 @@ law-project-hoster/
 │   ├── db.py                SQLite by default, Postgres when DATABASE_URL is set
 │   ├── schemas.py           Request and response models
 │   ├── api/routes.py        Every endpoint
+│   ├── api/byok.py          Reads a visitor's own key out of the request headers
 │   ├── llm/
 │   │   ├── base.py          Provider contract, JSON coercion, output sanitising
-│   │   ├── providers.py     Gemini, Groq, OpenAI, Hugging Face adapters
+│   │   ├── keyring.py       Per request credentials, held only for that request
+│   │   ├── providers.py     Gemini, Groq, Cloudflare, OpenAI, Hugging Face adapters
 │   │   └── registry.py      Discovery, selection and the calls tools make
 │   └── services/
 │       ├── documents.py     PDF, DOCX, image and text extraction with vision OCR
@@ -352,18 +405,22 @@ law-project-hoster/
 │       ├── drafting.py      Document Drafter, Counter Arguments
 │       ├── bare_acts.py     Statute library
 │       ├── tracker.py       Case diary and eCourts lookup
+│       ├── seed.py          Sample matters, inserted only into an empty tracker
 │       └── exports.py       DOCX, PDF and CSV builders
 ├── web/
 │   ├── index.html           App shell and icon sprite
 │   ├── styles.css           Design system, light and dark
 │   └── app.js               Views, routing, components, markdown renderer
 ├── data/bare_acts_data.json Statute corpus
+├── docs/demo/               Walkthrough video, captions and preview GIF
+├── docs/screenshots/        Stills of every tool, from the live deployment
 ├── render.yaml              Render blueprint
+├── render.root.yaml         Same blueprint for use from a parent repository
 ├── Dockerfile               Container build
 └── requirements.txt
 ```
 
-Three of the four providers speak the OpenAI chat completions protocol, so they
+Four of the five providers speak the OpenAI chat completions protocol, so they
 share one adapter with different base URLs. Gemini has its own. Above them,
 `registry.py` is the only thing the tools talk to, which is why adding a
 provider is a small change in one file.
@@ -455,8 +512,8 @@ Errors come back in one shape, with something the user can act on:
   Manual entry is the reliable route and the interface says so.
 - **OCR reads the first `MAX_OCR_PAGES` pages**, eight by default, and needs a
   provider with a vision model.
-- **Free tiers run out.** All four providers have free tiers that will rate
-  limit under heavy use. The app surfaces that clearly. Quotas are counted per
+- **Free tiers run out.** Every provider here except OpenAI has a free tier,
+  and each will rate limit under heavy use. The app surfaces that clearly. Quotas are counted per
   model, so a different model on the same provider usually still works, and the
   picker lets you switch in two clicks.
 

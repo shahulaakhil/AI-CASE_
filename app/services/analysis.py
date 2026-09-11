@@ -27,11 +27,11 @@ Rules:
 5. The significance field is one short line of legal consequence, for example
    "Date of cause of action", "Filing of FIR", "Limitation starts to run".
 6. Sort the array in chronological order.
-7. Return an array only, with no wrapper object."""
+7. Put every date you find in one single array. Never stop after the first entry."""
 
-_DATES_SHAPE = """[
+_DATES_SHAPE = """{"items": [
   {"date": "12-03-2021", "event": "...", "source": "Para 4 of the plaint", "significance": "..."}
-]"""
+]}"""
 
 
 def _as_rows(payload: Any) -> list[dict]:
@@ -68,8 +68,8 @@ def list_of_dates(
 ) -> list[dict]:
     header = f"CASE: {case_title}\n\n" if case_title else ""
     prompt = (
-        f"{header}Extract every material date and event from the legal document below. "
-        f"Return a JSON array sorted chronologically.\n\nDOCUMENT:\n{clip(text, 60000)}"
+        f"{header}Extract every material date and event from the legal document below, "
+        f"sorted chronologically.\n\nDOCUMENT:\n{clip(text, 60000)}"
     )
     payload = llm.generate_json(
         prompt,
@@ -79,6 +79,7 @@ def list_of_dates(
         schema_hint=_DATES_SHAPE,
         temperature=0.1,
         max_tokens=6000,
+        expect_list=True,
     )
     return _as_rows(payload)
 

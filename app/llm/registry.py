@@ -182,6 +182,43 @@ def generate(
     )
 
 
+# Keys a model might reasonably choose when asked to wrap a list in an object.
+_LIST_KEYS = (
+    "items", "rows", "results", "data", "list", "entries", "records",
+    "dates", "events", "claims", "arguments", "output",
+)
+
+
+def unwrap_list(payload: Any) -> list:
+    """Pull a list out of whatever shape the model actually returned.
+
+    A JSON mode that only permits a top level object is common, so a tool that
+    wants an array has to ask for one wrapped in an object. Models then vary in
+    what they name the key, and a smaller model sometimes returns a single bare
+    object instead of a list of one. All three cases end up as a list here.
+    """
+    if isinstance(payload, list):
+        return payload
+    if not isinstance(payload, dict):
+        return []
+
+    for key in _LIST_KEYS:
+        value = payload.get(key)
+        if isinstance(value, list):
+            return value
+
+    # Any single list value will do if the key was something unexpected.
+    lists = [v for v in payload.values() if isinstance(v, list)]
+    if len(lists) == 1:
+        return lists[0]
+
+    # A lone object that is itself one row, which is what a strict object mode
+    # produces when the model gives up on the array.
+    if any(not isinstance(v, (list, dict)) for v in payload.values()):
+        return [payload]
+    return []
+
+
 def generate_json(
     prompt: str,
     *,
@@ -191,11 +228,18 @@ def generate_json(
     temperature: float = 0.1,
     max_tokens: int = 4096,
     schema_hint: str = "",
+    expect_list: bool = False,
 ) -> Any:
     """Ask for JSON and parse it defensively.
 
     Providers differ in how well they honour a JSON mode, so the schema is
     always described in the prompt and the response is parsed leniently.
+
+    Set expect_list when the tool wants an array. Several providers, Cloudflare
+    Workers AI among them, constrain JSON mode to a single top level object, so
+    asking for a bare array there yields one object holding only the first row.
+    The request is therefore made for an object wrapping the array, and the
+    array is unwrapped on the way out.
     """
     selection = resolve(provider, model)
     full_system = system or ""
@@ -203,27 +247,49 @@ def generate_json(
         full_system = (
             f"{full_system}\n\nReturn JSON matching this shape exactly:\n{schema_hint}"
         ).strip()
+    if expect_list:
+        full_system = (
+            f"{full_system}\n\nReturn a single JSON object with one key, \"items\", whose "
+            "value is the complete array. Put every entry in that one array. Never return "
+            "a bare object for a single entry."
+        ).strip()
 
-    raw = selection.provider.generate(
-        prompt,
-        model=selection.model,
-        system=full_system,
-        temperature=temperature,
-        max_tokens=max_tokens,
-        json_mode=True,
-    )
-    try:
-        return coerce_json(raw)
-    except ValueError as exc:
-        raise LLMError(
-            str(exc),
-            provider=selection.provider.id,
+    # A reasoning model occasionally emits its own analysis in place of the
+    # JSON, which is a per call accident rather than a property of the model,
+    # so an unparseable answer is worth asking for again before giving up.
+    last_error: ValueError | None = None
+    for attempt in range(3):
+        system_for_attempt = full_system
+        if attempt:
+            system_for_attempt = (
+                f"{full_system}\n\nYour previous answer could not be parsed. Reply with "
+                "the JSON value and nothing else. No analysis, no explanation, no prose "
+                "before or after it."
+            )
+        raw = selection.provider.generate(
+            prompt,
             model=selection.model,
-            hint=(
-                "The selected model did not return structured output. "
-                "A larger model usually fixes this."
-            ),
-        ) from exc
+            system=system_for_attempt,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            json_mode=True,
+        )
+        try:
+            parsed = coerce_json(raw)
+        except ValueError as exc:
+            last_error = exc
+            continue
+        return unwrap_list(parsed) if expect_list else parsed
+
+    raise LLMError(
+        str(last_error),
+        provider=selection.provider.id,
+        model=selection.model,
+        hint=(
+            "The selected model did not return structured output after three "
+            "attempts. A larger model usually fixes this."
+        ),
+    ) from last_error
 
 
 def vision(
