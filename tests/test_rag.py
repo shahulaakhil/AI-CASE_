@@ -62,11 +62,13 @@ class JudgmentRagTests(unittest.TestCase):
             patch.object(rag, "_embedding_instance_name", ""),
         ):
             model = rag._get_embedding_model()
+            self.assertIs(rag._get_embedding_model(), encoder)
 
         self.assertIs(model, encoder)
         constructor.assert_called_once_with(
             model_name=model_name,
             cache_dir=str(cache_dir),
+            threads=1,
         )
 
     def test_local_embedding_does_not_require_an_api_key(self) -> None:

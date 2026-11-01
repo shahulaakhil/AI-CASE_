@@ -1,0 +1,40 @@
+2026-11-02 01:59:17,956 INFO LitigatAI RAG evaluation starting (run e6290ca2d23a45b29b40d7ab45a32a90).
+2026-11-02 01:59:17,956 INFO Evaluation SQLite database: C:\Users\ACER\Downloads\Gen AI\Gen AI\LitigatAI\data\rag_evaluation_isolated\evaluation_e6290ca2d23a45b29b40d7ab45a32a90.db
+2026-11-02 01:59:17,956 INFO Normal application database is not selected for this run.
+2026-11-02 01:59:17,957 INFO Validated 15 benchmark questions.
+2026-11-02 01:59:17,962 INFO Loaded 15 prior result rows for resume.
+2026-11-02 01:59:17,962 INFO PDF files discovered:
+2026-11-02 01:59:17,962 INFO   48216_2024_9_1502_63440_Judgement_19-Aug-2025.pdf
+2026-11-02 01:59:17,962 INFO   State_vs_Nijam_Sheik_on_18_March_2026.PDF
+2026-11-02 01:59:18,095 INFO Verified benchmark ID to judgment mapping:
+2026-11-02 01:59:18,096 INFO   2c909352ffc6 -> 48216_2024_9_1502_63440_Judgement_19-Aug-2025.pdf
+2026-11-02 01:59:18,096 INFO   35b3c146f681 -> State_vs_Nijam_Sheik_on_18_March_2026.PDF
+2026-11-02 01:59:18,118 INFO Database isolation verified: SQLite only; path=C:\Users\ACER\Downloads\Gen AI\Gen AI\LitigatAI\data\rag_evaluation_isolated\evaluation_e6290ca2d23a45b29b40d7ab45a32a90.db
+2026-11-02 01:59:18,119 INFO Embedding model: sentence-transformers/all-MiniLM-L6-v2; cache directory: C:\Users\ACER\Downloads\Gen AI\Gen AI\LitigatAI\data\models\fastembed; local model file found: True
+2026-11-02 01:59:18,785 INFO Embedding model ready: dimension=384.
+2026-11-02 01:59:19,941 INFO LLM selection from existing provider registry: groq / qwen/qwen3.8-27b
+2026-11-02 01:59:19,941 INFO Indexing 48216_2024_9_1502_63440_Judgement_19-Aug-2025.pdf: 15 readable pages, 20375 characters.
+2026-11-02 01:59:22,934 INFO Index verified for benchmark ID 2c909352ffc6: 25 chunks.
+2026-11-02 01:59:22,935 INFO Indexing State_vs_Nijam_Sheik_on_18_March_2026.PDF: 39 readable pages, 117660 characters.
+2026-11-02 01:59:36,182 INFO Index verified for benchmark ID 35b3c146f681: 110 chunks.
+2026-11-02 01:59:36,182 INFO Q1 already succeeded; preserving prior output.
+2026-11-02 01:59:36,182 INFO Q2 already succeeded; preserving prior output.
+2026-11-02 01:59:36,182 INFO Q3 already succeeded; preserving prior output.
+2026-11-02 01:59:36,182 INFO Q4 already succeeded; preserving prior output.
+2026-11-02 01:59:36,182 INFO Q5 already succeeded; preserving prior output.
+2026-11-02 01:59:36,182 INFO Q6 already succeeded; preserving prior output.
+2026-11-02 01:59:36,182 INFO Q7 already succeeded; preserving prior output.
+2026-11-02 01:59:36,182 INFO Q8 already succeeded; preserving prior output.
+2026-11-02 01:59:36,182 INFO Q9 already succeeded; preserving prior output.
+2026-11-02 01:59:36,182 INFO Q10 already succeeded; preserving prior output.
+2026-11-02 01:59:36,182 INFO Q11 already succeeded; preserving prior output.
+2026-11-02 01:59:36,182 INFO Q12 already succeeded; preserving prior output.
+2026-11-02 01:59:36,182 INFO Q13 already succeeded; preserving prior output.
+2026-11-02 01:59:36,182 INFO Q14 already succeeded; preserving prior output.
+2026-11-02 01:59:36,183 INFO Q15 already succeeded; preserving prior output.
+2026-11-02 01:59:36,186 INFO Removed temporary evaluation document bcc381a9eff845e28a82f16fa506e312.
+2026-11-02 01:59:36,192 INFO Removed temporary evaluation document 89b6ef222b9042c6860facde8acb3251.
+2026-11-02 01:59:36,212 INFO Evaluation status: completed
+2026-11-02 01:59:36,212 INFO Completed output rows: 15/15.
+2026-11-02 01:59:36,212 INFO Report files: {"per_question_results": "C:\\Users\\ACER\\Downloads\\Gen AI\\Gen AI\\LitigatAI\\rag_eval_results\\rag_per_question_results.csv", "manual_review": "C:\\Users\\ACER\\Downloads\\Gen AI\\Gen AI\\LitigatAI\\rag_eval_results\\rag_manual_review.csv", "summary": "C:\\Users\\ACER\\Downloads\\Gen AI\\Gen AI\\LitigatAI\\rag_eval_results\\rag_evaluation_summary.json", "report": "C:\\Users\\ACER\\Downloads\\Gen AI\\Gen AI\\LitigatAI\\rag_eval_results\\rag_evaluation_report.md", "diagnostics": "C:\\Users\\ACER\\Downloads\\Gen AI\\Gen AI\\LitigatAI\\rag_eval_results\\rag_evaluation_diagnostics.log"}
+2026-11-02 01:59:36,212 INFO Retrieval proxy metrics: {"eligible_answerable_questions": 13, "hit_rate_at_5_pct": 76.92, "precision_at_5_pct": 24.62, "recall_at_5_pct": 69.23, "mrr_at_5": 0.4218, "definition": "Expected page membership is used as a relevance proxy. Precision counts retrieved chunks whose page is labeled relevant, divided by 5; recall is the fraction of distinct expected pages represented in the top 5."}

@@ -5,6 +5,7 @@ import io
 import zipfile
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Iterable, Sequence
 
 from .. import settings
 from ..llm import ImagePart, LLMError, registry as llm
@@ -68,26 +69,41 @@ def _suffix(filename: str) -> str:
     return Path(filename or "").suffix.lower()
 
 
+def _extract_pdf_content(data: bytes) -> tuple[list[str], set[int]]:
+    import fitz
+
+    page_texts: list[str] = []
+    image_pages: set[int] = set()
+    with fitz.open(stream=data, filetype="pdf") as doc:
+        for page_number, page in enumerate(doc, start=1):
+            page_texts.append(page.get_text("text"))
+            if page.get_images(full=True):
+                image_pages.add(page_number)
+    return page_texts, image_pages
+
+
 def extract_pdf_text(data: bytes) -> tuple[str, int]:
-    page_texts = extract_pdf_pages(data)
+    page_texts, _ = _extract_pdf_content(data)
     return "\n\n".join(part for part in page_texts if part.strip()), len(page_texts)
 
 
 def extract_pdf_pages(data: bytes) -> list[str]:
+    page_texts, _ = _extract_pdf_content(data)
+    return page_texts
+
+
+def _pdf_page_images(
+    data: bytes,
+    page_numbers: Sequence[int],
+    dpi: int = 170,
+) -> Iterable[tuple[bytes, str]]:
     import fitz
 
     with fitz.open(stream=data, filetype="pdf") as doc:
-        return [page.get_text("text") for page in doc]
-
-
-def pdf_page_image(data: bytes, page_number: int, dpi: int = 170) -> bytes:
-    import fitz
-
-    with fitz.open(stream=data, filetype="pdf") as doc:
-        page = doc[page_number]
         matrix = fitz.Matrix(dpi / 72, dpi / 72)
-        pixmap = page.get_pixmap(matrix=matrix)
-        return pixmap.tobytes("png")
+        for page_number in page_numbers:
+            pixmap = doc[page_number - 1].get_pixmap(matrix=matrix)
+            yield pixmap.tobytes("png"), "image/png"
 
 
 def extract_docx_text(data: bytes) -> str:
@@ -111,7 +127,13 @@ def extract_docx_text(data: bytes) -> str:
     return "\n".join(parts)
 
 
-def extract_docx_images(data: bytes) -> list[tuple[bytes, str]]:
+def extract_docx_images(
+    data: bytes,
+    *,
+    limit: int | None = None,
+) -> list[tuple[bytes, str]]:
+    if limit is not None and limit <= 0:
+        return []
     images: list[tuple[bytes, str]] = []
     try:
         with zipfile.ZipFile(io.BytesIO(data)) as archive:
@@ -119,23 +141,32 @@ def extract_docx_images(data: bytes) -> list[tuple[bytes, str]]:
                 if name.startswith("word/media/"):
                     mime = _IMAGE_MIME.get(Path(name).suffix.lower(), "image/jpeg")
                     images.append((archive.read(name), mime))
+                    if limit is not None and len(images) >= limit:
+                        break
     except zipfile.BadZipFile:
         pass
     return images
 
 
 def _ocr_images(
-    images: list[tuple[bytes, str]],
+    images: Iterable[tuple[bytes, str]],
     *,
     provider: str | None,
     model: str | None,
     separator: str,
     numbered_pages: bool = False,
+    page_numbers: Sequence[int] | None = None,
 ) -> tuple[str, list[str], list[tuple[int | None, str]]]:
     parts: list[str] = []
     warnings: list[str] = []
     page_texts: list[tuple[int | None, str]] = []
     for index, (payload, mime) in enumerate(images, start=1):
+        page_number = (
+            page_numbers[index - 1]
+            if page_numbers and index <= len(page_numbers)
+            else index if numbered_pages else None
+        )
+        label_number = page_number if numbered_pages else index
         try:
             text = llm.vision(
                 [ImagePart(data=payload, mime_type=mime)],
@@ -147,12 +178,12 @@ def _ocr_images(
         except LLMError as exc:
             if index == 1:
                 raise
-            warnings.append(f"{separator} {index} could not be read: {exc.message}")
+            warnings.append(f"{separator} {label_number} could not be read: {exc.message}")
             continue
         if text.strip().upper() == "BLANK":
             continue
-        parts.append(f"[{separator} {index}]\n{text}")
-        page_texts.append((index if numbered_pages else None, text))
+        parts.append(f"[{separator} {label_number}]\n{text}")
+        page_texts.append((page_number, text))
     return "\n\n".join(parts), warnings, page_texts
 
 
@@ -171,42 +202,86 @@ def extract(
     warnings: list[str] = []
 
     if suffix == ".pdf":
-        pdf_pages = extract_pdf_pages(data)
-        text = "\n\n".join(part for part in pdf_pages if part.strip())
+        pdf_pages, image_pages = _extract_pdf_content(data)
         page_count = len(pdf_pages)
-        needs_ocr = force_ocr or len(text.strip()) < 120
-        if not needs_ocr:
+        pages_to_ocr = (
+            list(range(1, min(page_count, page_budget) + 1))
+            if force_ocr
+            else [
+                page_number
+                for page_number, page_text in enumerate(pdf_pages, start=1)
+                if not page_text.strip() and page_number in image_pages and page_number <= page_budget
+            ]
+        )
+        if not pages_to_ocr:
             page_texts = [
                 (page_number, page_text)
                 for page_number, page_text in enumerate(pdf_pages, start=1)
                 if page_text.strip()
             ]
-            return Extraction(text, "pdf-text", page_count, filename, page_texts=page_texts)
+            if not force_ocr and any(
+                not page_text.strip() and page_number in image_pages and page_number > page_budget
+                for page_number, page_text in enumerate(pdf_pages, start=1)
+            ):
+                warnings.append(
+                    f"Scanned pages after page {page_budget} were not read by OCR. "
+                    "Raise MAX_OCR_PAGES to read more."
+                )
+            return Extraction(
+                "\n\n".join(page_text for _, page_text in page_texts),
+                "pdf-text",
+                page_count,
+                filename,
+                warnings,
+                page_texts=page_texts,
+            )
 
-        pages_to_read = min(page_count, page_budget)
-        images = [(pdf_page_image(data, i), "image/png") for i in range(pages_to_read)]
+        images = _pdf_page_images(data, pages_to_ocr)
         ocr_text, ocr_warnings, ocr_pages = _ocr_images(
-            images, provider=provider, model=model, separator="Page", numbered_pages=True
+            images,
+            provider=provider,
+            model=model,
+            separator="Page",
+            numbered_pages=True,
+            page_numbers=pages_to_ocr,
         )
         warnings.extend(ocr_warnings)
-        if page_count > pages_to_read:
+        if force_ocr and len(pages_to_ocr) < page_count:
             warnings.append(
-                f"Only the first {pages_to_read} of {page_count} pages were read by OCR. "
+                f"Only {len(pages_to_ocr)} page(s) were read by OCR due to the configured limit. "
                 "Raise MAX_OCR_PAGES to read more."
             )
-        combined = ocr_text if len(ocr_text.strip()) > len(text.strip()) else text
-        page_texts = ocr_pages if len(ocr_text.strip()) > len(text.strip()) else [
-            (page_number, page_text)
+        elif not force_ocr and any(
+            not page_text.strip() and page_number in image_pages and page_number > page_budget
+            for page_number, page_text in enumerate(pdf_pages, start=1)
+        ):
+            warnings.append(
+                f"Scanned pages after page {page_budget} were not read by OCR. "
+                "Raise MAX_OCR_PAGES to read more."
+            )
+        page_text_by_number = {
+            page_number: page_text
             for page_number, page_text in enumerate(pdf_pages, start=1)
             if page_text.strip()
-        ]
-        return Extraction(combined, "pdf-ocr", page_count, filename, warnings, page_texts)
+        }
+        for page_number, page_text in ocr_pages:
+            if page_number is not None and len(page_text) > len(page_text_by_number.get(page_number, "")):
+                page_text_by_number[page_number] = page_text
+        page_texts = sorted(page_text_by_number.items())
+        return Extraction(
+            "\n\n".join(page_text for _, page_text in page_texts),
+            "pdf-ocr",
+            page_count,
+            filename,
+            warnings,
+            page_texts,
+        )
 
     if suffix == ".docx":
         text = extract_docx_text(data)
-        if len(text.strip()) >= 60 and not force_ocr:
+        if text.strip() and not force_ocr:
             return Extraction(text, "docx", 0, filename, page_texts=[(None, text)] if text.strip() else [])
-        images = extract_docx_images(data)[:page_budget]
+        images = extract_docx_images(data, limit=page_budget)
         if not images:
             return Extraction(text, "docx", 0, filename, page_texts=[(None, text)] if text.strip() else [])
         ocr_text, ocr_warnings, ocr_pages = _ocr_images(
@@ -241,13 +316,19 @@ def needs_vision(data: bytes, filename: str) -> bool:
         return True
     if suffix == ".pdf":
         try:
-            text, _ = extract_pdf_text(data)
+            page_texts, image_pages = _extract_pdf_content(data)
         except Exception:  # noqa: BLE001 - a broken PDF still needs OCR
             return True
-        return len(text.strip()) < 120
+        return any(
+            not page_text.strip() and page_number in image_pages
+            for page_number, page_text in enumerate(page_texts, start=1)
+        )
     if suffix == ".docx":
         try:
-            return len(extract_docx_text(data).strip()) < 60
+            return (
+                not extract_docx_text(data).strip()
+                and bool(extract_docx_images(data, limit=1))
+            )
         except Exception:  # noqa: BLE001
             return True
     return False

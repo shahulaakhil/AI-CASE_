@@ -12,6 +12,7 @@ env/
 .mypy_cache/
 data/*.db
 data/*.db-journal
+data/models/
 uploads/
 output/
 .DS_Store

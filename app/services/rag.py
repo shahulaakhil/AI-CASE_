@@ -53,6 +53,7 @@ def _get_embedding_model():
             _embedding_instance = TextEmbedding(
                 model_name=model_name,
                 cache_dir=str(cache_dir),
+                threads=1,
             )
         except Exception as exc:  # noqa: BLE001 - model download and runtime failures
             raise EmbeddingError(

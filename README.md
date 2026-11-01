@@ -319,12 +319,13 @@ Then add your keys under Environment.
 | `CORS_ORIGINS` | no | Comma separated origins, only needed for a separate front end |
 
 Judgment Q&A uses `sentence-transformers/all-MiniLM-L6-v2` locally for
-embeddings; the model is downloaded and cached on first use (so the server
-needs network access once) and needs no embedding API key. The existing
-selected LLM provider (Groq Qwen, when selected) generates the grounded
-answer. Judgment text, chunk vectors, and page metadata are stored in the
-configured SQLite/Postgres database; removing a judgment from its upload card
-deletes its index.
+embeddings and needs no embedding API key. Local development downloads and
+caches the model on first use; the Render blueprints fetch it during the build
+so the first user upload does not wait on a model download. The existing
+selected LLM provider (Groq Qwen, when selected) generates the grounded answer.
+Judgment text, chunk vectors, and page metadata are stored in the configured
+SQLite/Postgres database; removing a judgment from its upload card deletes its
+index.
 
 None of the five provider keys is required any more: with
 `ALLOW_CLIENT_KEYS` left on, a deployment with no keys at all boots fine and

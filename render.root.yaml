@@ -20,7 +20,7 @@ services:
     plan: free
     region: singapore
     rootDir: law-project-hoster
-    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt && python -c "from app import settings; from fastembed import TextEmbedding; TextEmbedding(model_name=settings.EMBEDDING_MODEL, cache_dir=str(settings.DATA_DIR / 'models' / 'fastembed'), threads=1)"
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 1 --timeout-keep-alive 65
     healthCheckPath: /api/health
     autoDeploy: true

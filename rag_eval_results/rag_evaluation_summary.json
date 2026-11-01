@@ -1,0 +1,53 @@
+{
+  "status": "completed",
+  "dataset_questions": 15,
+  "questions_with_results": 15,
+  "questions_with_generated_answers": 15,
+  "documents_evaluated": 2,
+  "document_mapping": {
+    "2c909352ffc6": "48216_2024_9_1502_63440_Judgement_19-Aug-2025.pdf",
+    "35b3c146f681": "State_vs_Nijam_Sheik_on_18_March_2026.PDF"
+  },
+  "top_k": 5,
+  "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+  "llm_provider": "groq",
+  "llm_model": "qwen/qwen3.8-27b",
+  "retrieval_metrics_expected_page_proxy": {
+    "eligible_answerable_questions": 13,
+    "hit_rate_at_5_pct": 76.92,
+    "precision_at_5_pct": 24.62,
+    "recall_at_5_pct": 69.23,
+    "mrr_at_5": 0.4218,
+    "definition": "Expected page membership is used as a relevance proxy. Precision counts retrieved chunks whose page is labeled relevant, divided by 5; recall is the fraction of distinct expected pages represented in the top 5."
+  },
+  "answerability_decision_agreement": {
+    "eligible_answers": 15,
+    "accuracy_pct": 93.33,
+    "definition": "Agreement between the model's supported flag and the CSV answerable label; not a semantic answer-correctness or faithfulness score."
+  },
+  "latency": {
+    "retrieval": {
+      "mean_seconds": 0.0185,
+      "median_seconds": 0.0216
+    },
+    "end_to_end_response": {
+      "mean_seconds": 11.0708,
+      "median_seconds": 13.463
+    }
+  },
+  "failures": [],
+  "limitations": [
+    "Retrieval relevance is a page-level proxy from expected_pages, not human-verified semantic relevance.",
+    "Answer correctness, faithfulness, citation support, and hallucination require human review.",
+    "The answerability decision agreement is not a measure of factual answer quality.",
+    "Latency is from this local run and may differ in deployment."
+  ],
+  "production_database_modified": false,
+  "output_files": {
+    "per_question_results": "C:\\Users\\ACER\\Downloads\\Gen AI\\Gen AI\\LitigatAI\\rag_eval_results\\rag_per_question_results.csv",
+    "manual_review": "C:\\Users\\ACER\\Downloads\\Gen AI\\Gen AI\\LitigatAI\\rag_eval_results\\rag_manual_review.csv",
+    "summary": "C:\\Users\\ACER\\Downloads\\Gen AI\\Gen AI\\LitigatAI\\rag_eval_results\\rag_evaluation_summary.json",
+    "report": "C:\\Users\\ACER\\Downloads\\Gen AI\\Gen AI\\LitigatAI\\rag_eval_results\\rag_evaluation_report.md",
+    "diagnostics": "C:\\Users\\ACER\\Downloads\\Gen AI\\Gen AI\\LitigatAI\\rag_eval_results\\rag_evaluation_diagnostics.log"
+  }
+}

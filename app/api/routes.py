@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import io
 import json
+import logging
 from typing import Any
 
 from fastapi import APIRouter, Body, Depends, File, Form, HTTPException, Query, UploadFile
@@ -26,6 +27,7 @@ from ..services import (
 # Every endpoint below resolves the caller's own API keys first, so no handler
 # needs to mention the feature.
 router = APIRouter(dependencies=[Depends(bind_client_keys)])
+logger = logging.getLogger(__name__)
 
 
 def _fail(exc: LLMError) -> HTTPException:
@@ -166,23 +168,22 @@ def providers_verify_kanoon() -> dict[str, Any]:
 
 
 @router.post("/extract")
-async def extract(
+def extract(
     file: UploadFile = File(...),
     provider: str = Form(default=""),
     model: str = Form(default=""),
     force_ocr: bool = Form(default=False),
     index_judgment: bool = Form(default=False),
 ) -> dict[str, Any]:
-    payload = await file.read()
-    size_mb = len(payload) / (1024 * 1024)
-    if size_mb > settings.MAX_UPLOAD_MB:
+    max_upload_bytes = max(0, settings.MAX_UPLOAD_MB) * 1024 * 1024
+    payload = file.file.read(max_upload_bytes + 1)
+    if len(payload) > max_upload_bytes:
         raise HTTPException(
             status_code=413,
             detail={
                 "error": {
                     "message": (
-                        f"That file is {size_mb:.1f} MB. The limit is "
-                        f"{settings.MAX_UPLOAD_MB} MB."
+                        f"The upload exceeds the configured {settings.MAX_UPLOAD_MB} MB limit."
                     )
                 }
             },
@@ -201,24 +202,41 @@ async def extract(
             force_ocr=force_ocr,
         )
     except LLMError as exc:
+        logger.warning(
+            "Vision extraction failed for an uploaded document (%s).",
+            exc.provider or "provider unavailable",
+        )
         raise _fail(exc) from exc
     except ValueError as exc:
         raise HTTPException(status_code=400, detail={"error": {"message": str(exc)}}) from exc
     except Exception as exc:  # noqa: BLE001 - surface a readable message
+        logger.error(
+            "Document extraction failed (%s).",
+            type(exc).__name__,
+        )
         raise HTTPException(
             status_code=422,
             detail={
                 "error": {
-                    "message": f"That file could not be read: {exc}",
-                    "hint": "Try re-saving it as a PDF, or paste the text directly.",
+                    "message": "The uploaded file is not a valid or readable document.",
+                    "hint": "Check that the PDF or DOCX is not damaged or password-protected.",
                 }
             },
         ) from exc
 
     if not result.text.strip():
-        result.warnings.append(
-            "No readable text was found. If this is a scan, choose a provider with a "
-            "vision model and try again with OCR forced."
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "error": {
+                    "message": "No readable text could be extracted from this document.",
+                    "hint": (
+                        "If it is a scan, choose a vision-capable model and try again. "
+                        "Otherwise, check that the document contains text. "
+                        + " ".join(result.warnings)
+                    ),
+                }
+            },
         )
     payload = result.as_dict()
     if index_judgment and result.text.strip():
@@ -230,9 +248,19 @@ async def extract(
                     page_texts=result.page_texts,
                 )
             )
+            payload["rag_indexed"] = True
         except (rag.EmbeddingError, rag.IndexStorageError, ValueError) as exc:
+            logger.warning("Judgment indexing failed (%s).", type(exc).__name__)
             payload["rag_error"] = str(exc)
+            payload["rag_indexed"] = False
             result.warnings.append(str(exc))
+            payload["warnings"] = result.warnings
+        except Exception as exc:  # noqa: BLE001 - report index failure without discarding extracted text
+            logger.error("Judgment indexing failed (%s).", type(exc).__name__)
+            message = "The text was extracted, but the judgment could not be indexed."
+            payload["rag_error"] = message
+            payload["rag_indexed"] = False
+            result.warnings.append(message)
             payload["warnings"] = result.warnings
     return payload
 
