@@ -88,23 +88,31 @@ def list_of_dates(
 # Tool 8: Judgment Summariser
 # ---------------------------------------------------------------------------
 
-_BRIEF_SYSTEM = """You are a judicial clerk at the Supreme Court of India preparing a case
-brief for a practising advocate.
+_BRIEF_SYSTEM = """You are a senior judicial research clerk preparing an 8-card structured brief for an Indian litigation workbench.
 
 Rules:
-1. Work only from the judgment supplied. Never add facts that are not in it.
-2. Facts must be chronological and complete enough to argue from.
-3. Issues must be listed as the numbered questions the court framed.
-4. Arguments must name the statutory provision or authority each side relied on.
-5. Held is the operative order or decree, stated precisely.
-6. Ratio decidendi is the binding legal principle, stated in one or two clear sentences.
-7. Significance explains the precedent value for future Indian litigation.
-8. Look for the citation in AIR, SCC, SCR, SCALE or "(YEAR) VOL COURT PAGE" form.
-9. If a field genuinely cannot be determined from the text, return an empty string."""
+1. Work strictly from the judgment supplied. Never add facts not in the text.
+2. Populate all 8 structured modules:
+   - case_summary: case_name, citation, court, year, case_type, key_facts, issue.
+   - key_legal_provisions: list of {provision, description}.
+   - key_issue: the single primary legal question framed.
+   - timeline_of_events: list of {year_or_date, event}.
+   - findings_and_reasoning: list of 3-6 key legal principles or reasons.
+   - outcome: operative final ruling and holding.
+   - source_references: list of primary legal citations and sources.
+   - groundedness_reliability: list of {claim, source} mapping key findings to page/para.
+3. Return valid JSON only."""
 
 _BRIEF_SHAPE = """{
-  "case_details": {"case_name": "", "citation": "", "court": "", "bench": "",
-                   "date_of_judgment": "", "subject_matter": ""},
+  "case_details": {"case_name": "", "citation": "", "court": "", "bench": "", "date_of_judgment": "", "year": "", "case_type": "", "subject_matter": ""},
+  "case_summary": {"case_name": "", "citation": "", "court": "", "year": "", "case_type": "", "key_facts": "", "issue": ""},
+  "key_legal_provisions": [{"provision": "", "description": ""}], 
+  "key_issue": "",
+  "timeline_of_events": [{"year_or_date": "", "event": ""}], 
+  "findings_and_reasoning": [""],
+  "outcome": "",
+  "source_references": [""],
+  "groundedness_reliability": [{"claim": "", "source": ""}], 
   "facts": "",
   "issues": [""],
   "petitioner_arguments": "",
@@ -118,13 +126,18 @@ _BRIEF_SHAPE = """{
 
 _EMPTY_BRIEF = {
     "case_details": {
-        "case_name": "",
-        "citation": "",
-        "court": "",
-        "bench": "",
-        "date_of_judgment": "",
-        "subject_matter": "",
+        "case_name": "", "citation": "", "court": "", "bench": "", "date_of_judgment": "", "year": "", "case_type": "", "subject_matter": ""
     },
+    "case_summary": {
+        "case_name": "", "citation": "", "court": "", "year": "", "case_type": "", "key_facts": "", "issue": ""
+    },
+    "key_legal_provisions": [],
+    "key_issue": "",
+    "timeline_of_events": [],
+    "findings_and_reasoning": [],
+    "outcome": "",
+    "source_references": [],
+    "groundedness_reliability": [],
     "facts": "",
     "issues": [],
     "petitioner_arguments": "",
@@ -140,26 +153,96 @@ _EMPTY_BRIEF = {
 def _normalise_brief(payload: Any) -> dict:
     brief = dict(_EMPTY_BRIEF)
     brief["case_details"] = dict(_EMPTY_BRIEF["case_details"])
+    brief["case_summary"] = dict(_EMPTY_BRIEF["case_summary"])
     if not isinstance(payload, dict):
         return brief
 
-    details = payload.get("case_details")
+    details = payload.get("case_details") or {}
     if isinstance(details, dict):
         for key in brief["case_details"]:
             brief["case_details"][key] = str(details.get(key, "") or "").strip()
 
-    for key in ("facts", "petitioner_arguments", "respondent_arguments", "held", "ratio",
-                "significance"):
+    for key in ("facts", "petitioner_arguments", "respondent_arguments", "held", "ratio", "significance", "key_issue", "outcome"):
         value = payload.get(key, "")
         if isinstance(value, list):
             value = "\n".join(str(item) for item in value)
         brief[key] = str(value or "").strip()
 
-    for key in ("issues", "key_statutes_cited", "key_cases_cited"):
+    for key in ("issues", "key_statutes_cited", "key_cases_cited", "findings_and_reasoning", "source_references"):
         value = payload.get(key) or []
         if isinstance(value, str):
             value = [line.strip("-* ") for line in value.split("\n") if line.strip()]
         brief[key] = [str(item).strip() for item in value if str(item).strip()]
+
+    cs = payload.get("case_summary") or {}
+    if not isinstance(cs, dict):
+        cs = {}
+    brief["case_summary"] = {
+        "case_name": str(cs.get("case_name") or brief["case_details"].get("case_name") or "").strip(),
+        "citation": str(cs.get("citation") or brief["case_details"].get("citation") or "").strip(),
+        "court": str(cs.get("court") or brief["case_details"].get("court") or "").strip(),
+        "year": str(cs.get("year") or brief["case_details"].get("year") or (brief["case_details"].get("date_of_judgment", "")[-4:]) or "").strip(),
+        "case_type": str(cs.get("case_type") or brief["case_details"].get("case_type") or brief["case_details"].get("subject_matter") or "").strip(),
+        "key_facts": str(cs.get("key_facts") or brief.get("facts") or "").strip(),
+        "issue": str(cs.get("issue") or brief.get("key_issue") or (brief["issues"][0] if brief["issues"] else "")).strip(),
+    }
+
+    if not brief["key_issue"]:
+        brief["key_issue"] = brief["case_summary"]["issue"] or (brief["issues"][0] if brief["issues"] else "")
+    if not brief["outcome"]:
+        brief["outcome"] = brief.get("held") or ""
+
+    klp = payload.get("key_legal_provisions") or []
+    if isinstance(klp, list):
+        clean_klp = []
+        for item in klp:
+            if isinstance(item, dict):
+                p = str(item.get("provision") or item.get("article") or item.get("section") or "").strip()
+                d = str(item.get("description") or item.get("principle") or "").strip()
+                if p:
+                    clean_klp.append({"provision": p, "description": d})
+            elif isinstance(item, str) and item.strip():
+                clean_klp.append({"provision": item.strip(), "description": ""})
+        brief["key_legal_provisions"] = clean_klp
+    if not brief["key_legal_provisions"] and brief["key_statutes_cited"]:
+        brief["key_legal_provisions"] = [{"provision": s, "description": ""} for s in brief["key_statutes_cited"]]
+
+    toe = payload.get("timeline_of_events") or []
+    if isinstance(toe, list):
+        clean_toe = []
+        for item in toe:
+            if isinstance(item, dict):
+                y = str(item.get("year_or_date") or item.get("date") or item.get("year") or "").strip()
+                e = str(item.get("event") or item.get("description") or "").strip()
+                if y or e:
+                    clean_toe.append({"year_or_date": y, "event": e})
+            elif isinstance(item, str) and item.strip():
+                clean_toe.append({"year_or_date": "", "event": item.strip()})
+        brief["timeline_of_events"] = clean_toe
+
+    if not brief["findings_and_reasoning"]:
+        if brief.get("ratio"):
+            brief["findings_and_reasoning"].append(brief["ratio"])
+        if brief.get("significance"):
+            brief["findings_and_reasoning"].append(brief["significance"])
+
+    if not brief["source_references"]:
+        c = brief["case_details"].get("citation")
+        if c:
+            brief["source_references"].append(c)
+        for cs_item in brief["key_cases_cited"][:3]:
+            brief["source_references"].append(cs_item)
+
+    gr = payload.get("groundedness_reliability") or []
+    if isinstance(gr, list):
+        clean_gr = []
+        for item in gr:
+            if isinstance(item, dict):
+                cl = str(item.get("claim") or item.get("element") or "").strip()
+                sc = str(item.get("source") or item.get("page_para") or item.get("reference") or "").strip()
+                if cl or sc:
+                    clean_gr.append({"claim": cl, "source": sc})
+        brief["groundedness_reliability"] = clean_gr
 
     return brief
 

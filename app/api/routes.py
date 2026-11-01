@@ -700,7 +700,7 @@ def export(request: schemas.ExportRequest = Body(...)) -> StreamingResponse:
     kind = request.kind
     fmt = request.format
     payload = request.payload or {}
-    title = request.title or "LitigatAI export"
+    title = request.title or "AI Case Intelligent export"
     subtitle = request.subtitle
     body = request.body
 
@@ -835,7 +835,7 @@ def export_raw(payload: dict[str, Any] = Body(...)) -> StreamingResponse:
         data = json.dumps(payload.get("payload", {}), indent=2, ensure_ascii=False).encode("utf-8")
         media = "application/json"
     else:
-        data = _render_text(fmt, payload.get("title", "LitigatAI"), body)
+        data = _render_text(fmt, payload.get("title", "AI Case Intelligent"), body)
         media = _MEDIA.get(fmt, "text/plain; charset=utf-8")
-    filename = exports.safe_filename(payload.get("filename", "litigatai"), fmt)
+    filename = exports.safe_filename(payload.get("filename", "ai_case_intelligent"), fmt)
     return _stream(data, filename, media)

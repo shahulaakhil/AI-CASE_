@@ -1,0 +1,9 @@
+{
+  "name": "ai-case-intelligent",
+  "version": "1.0.0",
+  "description": "AI Case Intelligent Dev Runner",
+  "scripts": {
+    "dev": "node dev.js",
+    "start": "node dev.js"
+  }
+}

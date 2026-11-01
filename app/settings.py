@@ -48,10 +48,10 @@ def env_int(name: str, default: int) -> int:
         return default
 
 
-APP_NAME = env("APP_NAME", default="LitigatAI")
+APP_NAME = env("APP_NAME", default="AI Case Intelligent")
 APP_TAGLINE = env(
     "APP_TAGLINE",
-    default="AI workbench for Indian litigation practice",
+    default="AI Case Intelligence for Indian litigation practice",
 )
 ENVIRONMENT = env("ENVIRONMENT", default="production")
 DEBUG = env_bool("DEBUG", False)

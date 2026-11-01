@@ -521,16 +521,32 @@ class GroqProvider(OpenAICompatibleProvider):
         self.env_key = settings.GROQ_API_KEY
         self.preferred = settings.GROQ_MODEL
         self.curated = [
-            ModelSpec("openai/gpt-oss-120b", "GPT OSS 120B",
-                      note="Strong reasoning, the best default here"),
-            ModelSpec("openai/gpt-oss-20b", "GPT OSS 20B", note="Fastest"),
-            ModelSpec("llama-3.3-70b-versatile", "Llama 3.3 70B Versatile"),
-            ModelSpec("groq/compound", "Compound", note="Tool augmented"),
-            ModelSpec("meta-llama/llama-4-scout-17b-16e-instruct", "Llama 4 Scout 17B",
-                      vision=True, note="Reads scanned pages"),
-            ModelSpec("meta-llama/llama-4-maverick-17b-128e-instruct", "Llama 4 Maverick 17B",
-                      vision=True, note="Larger vision model"),
+            ModelSpec("llama3-8b-8192", "Llama 3 8B", note="Fast and reliable default"),
+            ModelSpec("llama3-70b-8192", "Llama 3 70B", note="Capable"),
+            ModelSpec("mixtral-8x7b-32768", "Mixtral 8x7B"),
+            ModelSpec("gemma2-9b-it", "Gemma 2 9B"),
         ] + list(_extra(self.id))
+
+    def _call(self, messages, *, model, temperature, max_tokens, json_mode):
+        candidate = model
+        valid_ids = [m.id for m in self.models]
+        if candidate not in valid_ids and valid_ids:
+            candidate = valid_ids[0]
+        safe_messages = []
+        for msg in messages:
+            content = msg.get("content", "")
+            if isinstance(content, str) and len(content) > 18000:
+                content = content[:18000] + "\n\n[Excerpt trimmed to fit Groq free-tier token limit]"
+            safe_messages.append({**msg, "content": content})
+        safe_max_tokens = min(max_tokens, 2048)
+        print(f"[Groq] Calling model: {candidate} (requested: {model}, available: {valid_ids})")
+        try:
+            return super()._call(safe_messages, model=candidate, temperature=temperature, max_tokens=safe_max_tokens, json_mode=json_mode)
+        except LLMError as exc:
+            if ("does not exist" in str(exc).lower() or "404" in str(exc)) and valid_ids and candidate != valid_ids[0]:
+                print(f"[Groq] 404 on {candidate}, falling back to {valid_ids[0]}")
+                return super()._call(safe_messages, model=valid_ids[0], temperature=temperature, max_tokens=safe_max_tokens, json_mode=json_mode)
+            raise
 
 
 class OpenAIProvider(OpenAICompatibleProvider):
@@ -805,20 +821,10 @@ class GeminiProvider(BaseProvider):
         self.env_key = settings.GOOGLE_API_KEY
         self.preferred = settings.GEMINI_MODEL
         self.curated = [
-            ModelSpec(
-                "gemini-2.5-flash",
-                "Gemini 2.5 Flash",
-                vision=True,
-                note="Balanced default, reads scanned pages",
-            ),
-            ModelSpec("gemini-2.5-pro", "Gemini 2.5 Pro", vision=True, note="Deepest reasoning"),
-            ModelSpec(
-                "gemini-2.5-flash-lite",
-                "Gemini 2.5 Flash Lite",
-                vision=True,
-                note="Fastest and cheapest",
-            ),
-            ModelSpec("gemini-2.0-flash", "Gemini 2.0 Flash", vision=True),
+            ModelSpec("gemini-2.0-flash", "Gemini 2.0 Flash", vision=True, note="Stable free tier model"),
+            ModelSpec("gemini-2.0-flash-lite", "Gemini 2.0 Flash Lite", vision=True, note="Fastest and cheapest"),
+            ModelSpec("gemini-1.5-flash", "Gemini 1.5 Flash", vision=True),
+            ModelSpec("gemini-1.5-pro", "Gemini 1.5 Pro", vision=True),
         ] + list(_extra(self.id))
         # One SDK client per credential, never one per adapter, so a visitor's
         # key can never be reused for someone else's request.
