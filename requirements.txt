@@ -10,6 +10,7 @@ requests>=2.32.3
 # so one client library covers three of the four.
 openai>=1.59.6
 google-genai>=1.2.0
+fastembed>=0.7.3,<1.0
 
 # Document handling
 PyMuPDF>=1.25.2

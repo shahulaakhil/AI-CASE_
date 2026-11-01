@@ -54,6 +54,16 @@ class DocumentQuestionRequest(ModelChoice):
     history: list[Turn] = Field(default_factory=list)
 
 
+class JudgmentIndexRequest(ModelChoice):
+    text: str
+    document_name: str = "Judgment"
+
+
+class JudgmentQuestionRequest(ModelChoice):
+    question: str
+    history: list[Turn] = Field(default_factory=list)
+
+
 # --- Tool 3 ---------------------------------------------------------------
 
 

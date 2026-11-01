@@ -8,7 +8,7 @@ from typing import Any
 from fastapi import APIRouter, Body, Depends, File, Form, HTTPException, Query, UploadFile
 from fastapi.responses import StreamingResponse
 
-from .. import schemas, settings
+from .. import db, schemas, settings
 from ..llm import LLMError, registry as llm
 from .byok import bind_client_keys
 from ..services import (
@@ -18,6 +18,7 @@ from ..services import (
     drafting,
     exports,
     kanoon,
+    rag,
     research,
     tracker,
 )
@@ -102,6 +103,8 @@ def config() -> dict[str, Any]:
         "case_priorities": list(tracker.PRIORITIES),
         "acts_stats": bare_acts.stats(),
         "supported_uploads": sorted(documents.SUPPORTED_EXTENSIONS),
+        "rag_embeddings_ready": rag.embedding_available(),
+        "rag_embedding_model": rag.embedding_model(),
     }
 
 
@@ -168,6 +171,7 @@ async def extract(
     provider: str = Form(default=""),
     model: str = Form(default=""),
     force_ocr: bool = Form(default=False),
+    index_judgment: bool = Form(default=False),
 ) -> dict[str, Any]:
     payload = await file.read()
     size_mb = len(payload) / (1024 * 1024)
@@ -216,7 +220,73 @@ async def extract(
             "No readable text was found. If this is a scan, choose a provider with a "
             "vision model and try again with OCR forced."
         )
-    return result.as_dict()
+    payload = result.as_dict()
+    if index_judgment and result.text.strip():
+        try:
+            payload.update(
+                rag.index_judgment(
+                    result.text,
+                    filename=result.filename,
+                    page_texts=result.page_texts,
+                )
+            )
+        except (rag.EmbeddingError, rag.IndexStorageError, ValueError) as exc:
+            payload["rag_error"] = str(exc)
+            result.warnings.append(str(exc))
+            payload["warnings"] = result.warnings
+    return payload
+
+
+@router.post("/judgments", status_code=201)
+def judgment_index(request: schemas.JudgmentIndexRequest) -> dict[str, Any]:
+    text = _require_text(request.text, "judgment text")
+    if not rag.embedding_available():
+        raise HTTPException(
+            status_code=503,
+            detail={"error": {"message": (
+                "The local embedding dependency is unavailable. Install the project "
+                "requirements and restart the server."
+            )}},
+        )
+    try:
+        return rag.index_judgment(text, filename=request.document_name)
+    except rag.EmbeddingError as exc:
+        raise HTTPException(status_code=502, detail={"error": {"message": str(exc)}}) from exc
+    except rag.IndexStorageError as exc:
+        raise HTTPException(status_code=500, detail={"error": {"message": str(exc)}}) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail={"error": {"message": str(exc)}}) from exc
+
+
+@router.post("/judgments/{document_id}/questions")
+def judgment_question(
+    document_id: str, request: schemas.JudgmentQuestionRequest
+) -> dict[str, Any]:
+    question = _require_text(request.question, "question")
+    try:
+        return rag.answer_question(
+            document_id,
+            question,
+            provider=request.provider,
+            model=request.model,
+        )
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail={"error": {"message": str(exc)}}) from exc
+    except rag.EmbeddingError as exc:
+        raise HTTPException(status_code=502, detail={"error": {"message": str(exc)}}) from exc
+    except LLMError as exc:
+        raise _fail(exc) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=502, detail={"error": {"message": str(exc)}}) from exc
+
+
+@router.delete("/judgments/{document_id}")
+def judgment_delete(document_id: str) -> dict[str, bool]:
+    if not db.delete_judgment(document_id):
+        raise HTTPException(
+            status_code=404, detail={"error": {"message": "Judgment not found."}}
+        )
+    return {"deleted": True}
 
 
 @router.post("/extract/check")

@@ -61,6 +61,9 @@ GOOGLE_API_KEY = env("GOOGLE_API_KEY", "GEMINI_API_KEY")
 GROQ_API_KEY = env("GROQ_API_KEY")
 OPENAI_API_KEY = env("OPENAI_API_KEY")
 OPENAI_BASE_URL = env("OPENAI_BASE_URL", default="https://api.openai.com/v1")
+EMBEDDING_MODEL = env(
+    "EMBEDDING_MODEL", default="sentence-transformers/all-MiniLM-L6-v2"
+)
 HUGGINGFACE_API_KEY = env(
     "HUGGINGFACE_API_KEY", "HUGGINGFACE_API_TOKEN", "HF_TOKEN", "HF_API_KEY"
 )

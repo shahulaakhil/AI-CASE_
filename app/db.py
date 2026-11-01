@@ -52,6 +52,21 @@ CREATE TABLE IF NOT EXISTS cases (
     updated_at    TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_cases_next_date ON cases (next_date);
+CREATE TABLE IF NOT EXISTS judgment_documents (
+    id              TEXT PRIMARY KEY,
+    filename        TEXT NOT NULL DEFAULT '',
+    embedding_model TEXT NOT NULL,
+    created_at      TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS judgment_chunks (
+    document_id  TEXT NOT NULL,
+    chunk_index  INTEGER NOT NULL,
+    page_number  INTEGER,
+    text         TEXT NOT NULL,
+    embedding    TEXT NOT NULL,
+    PRIMARY KEY (document_id, chunk_index)
+);
+CREATE INDEX IF NOT EXISTS idx_judgment_chunks_document ON judgment_chunks (document_id);
 """
 
 POSTGRES_SCHEMA = """
@@ -72,6 +87,21 @@ CREATE TABLE IF NOT EXISTS cases (
     updated_at    TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_cases_next_date ON cases (next_date);
+CREATE TABLE IF NOT EXISTS judgment_documents (
+    id              TEXT PRIMARY KEY,
+    filename        TEXT NOT NULL DEFAULT '',
+    embedding_model TEXT NOT NULL,
+    created_at      TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS judgment_chunks (
+    document_id  TEXT NOT NULL,
+    chunk_index  INTEGER NOT NULL,
+    page_number  INTEGER,
+    text         TEXT NOT NULL,
+    embedding    TEXT NOT NULL,
+    PRIMARY KEY (document_id, chunk_index)
+);
+CREATE INDEX IF NOT EXISTS idx_judgment_chunks_document ON judgment_chunks (document_id);
 """
 
 COLUMNS = (
@@ -151,6 +181,94 @@ def execute(sql: str, params: tuple = ()) -> int:
     with connection() as conn:
         cursor = conn.execute(sql, params)
         return cursor.rowcount
+
+
+def save_judgment(
+    document_id: str,
+    filename: str,
+    embedding_model: str,
+    chunks: list[dict[str, Any]],
+) -> None:
+    """Replace a judgment and all its chunks atomically."""
+    init()
+    from datetime import datetime, timezone
+
+    created_at = datetime.now(timezone.utc).isoformat()
+    with connection() as conn:
+        if uses_postgres():
+            with conn.cursor() as cursor:
+                cursor.execute("DELETE FROM judgment_chunks WHERE document_id = %s", (document_id,))
+                cursor.execute("DELETE FROM judgment_documents WHERE id = %s", (document_id,))
+                cursor.execute(
+                    "INSERT INTO judgment_documents (id, filename, embedding_model, created_at) "
+                    "VALUES (%s, %s, %s, %s)",
+                    (document_id, filename, embedding_model, created_at),
+                )
+                cursor.executemany(
+                    "INSERT INTO judgment_chunks "
+                    "(document_id, chunk_index, page_number, text, embedding) "
+                    "VALUES (%s, %s, %s, %s, %s)",
+                    [
+                        (
+                            document_id, chunk["chunk_index"], chunk["page_number"],
+                            chunk["text"], json.dumps(chunk["embedding"]),
+                        )
+                        for chunk in chunks
+                    ],
+                )
+        else:
+            conn.execute("DELETE FROM judgment_chunks WHERE document_id = ?", (document_id,))
+            conn.execute("DELETE FROM judgment_documents WHERE id = ?", (document_id,))
+            conn.execute(
+                "INSERT INTO judgment_documents (id, filename, embedding_model, created_at) "
+                "VALUES (?, ?, ?, ?)",
+                (document_id, filename, embedding_model, created_at),
+            )
+            conn.executemany(
+                "INSERT INTO judgment_chunks "
+                "(document_id, chunk_index, page_number, text, embedding) "
+                "VALUES (?, ?, ?, ?, ?)",
+                [
+                    (
+                        document_id, chunk["chunk_index"], chunk["page_number"],
+                        chunk["text"], json.dumps(chunk["embedding"]),
+                    )
+                    for chunk in chunks
+                ],
+            )
+
+
+def judgment(document_id: str) -> dict | None:
+    rows = query(
+        "SELECT id, filename, embedding_model, created_at "
+        "FROM judgment_documents WHERE id = ?",
+        (document_id,),
+    )
+    return rows[0] if rows else None
+
+
+def judgment_chunks(document_id: str) -> list[dict]:
+    rows = query(
+        "SELECT chunk_index, page_number, text, embedding "
+        "FROM judgment_chunks WHERE document_id = ? ORDER BY chunk_index",
+        (document_id,),
+    )
+    for row in rows:
+        row["embedding"] = json.loads(row["embedding"])
+    return rows
+
+
+def delete_judgment(document_id: str) -> bool:
+    init()
+    with connection() as conn:
+        if uses_postgres():
+            with conn.cursor() as cursor:
+                cursor.execute("DELETE FROM judgment_chunks WHERE document_id = %s", (document_id,))
+                cursor.execute("DELETE FROM judgment_documents WHERE id = %s", (document_id,))
+                return cursor.rowcount > 0
+        conn.execute("DELETE FROM judgment_chunks WHERE document_id = ?", (document_id,))
+        cursor = conn.execute("DELETE FROM judgment_documents WHERE id = ?", (document_id,))
+        return cursor.rowcount > 0
 
 
 def row_to_case(row: dict) -> dict:

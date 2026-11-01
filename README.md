@@ -97,6 +97,7 @@ visitor's own API key per request.
 | --- | --- |
 | List of Dates | Every material date pulled out of a case file into a court ready chronology you can edit and export |
 | Judgment Summariser | A structured brief: case details, facts, issues, arguments, held, ratio, significance |
+| Judgment Q&A | Upload a judgment once, ask multiple questions, and see answers grounded in retrieved passages with page citations |
 | Authority Check | Whether a cited judgment is still good law, with the citing judgments that decide it |
 | Translate and OCR | Text out of scans, any Indian language into English, then a question box over the document |
 | Legal Research | Cited answers on Indian law, grounded in Indian Kanoon retrieval, or answers drawn from an uploaded judgment |
@@ -310,12 +311,20 @@ Then add your keys under Environment.
 | `ALLOW_CLIENT_KEYS` | no | `1` by default. `0` refuses visitor supplied keys |
 | `DEMO_SEED` | no | `1` inserts five sample matters into an empty tracker at start up |
 | `INDIAN_KANOON_API_TOKEN` | no | Live case law retrieval for Legal Research and Authority Check |
-| `DATABASE_URL` | no | Postgres for the case tracker, so it survives a redeploy |
+| `DATABASE_URL` | no | Postgres for the case tracker and judgment indexes, so they survive a redeploy |
 | `OPENAI_BASE_URL` | no | Point the OpenAI adapter at another gateway |
 | `GEMINI_MODEL`, `GROQ_MODEL`, `OPENAI_MODEL`, `HUGGINGFACE_MODEL` | no | Move one model to the top of its picker |
 | `MAX_UPLOAD_MB` | no | Upload ceiling, 25 by default |
 | `MAX_OCR_PAGES` | no | Pages sent to a vision model per document, 8 by default |
 | `CORS_ORIGINS` | no | Comma separated origins, only needed for a separate front end |
+
+Judgment Q&A uses `sentence-transformers/all-MiniLM-L6-v2` locally for
+embeddings; the model is downloaded and cached on first use (so the server
+needs network access once) and needs no embedding API key. The existing
+selected LLM provider (Groq Qwen, when selected) generates the grounded
+answer. Judgment text, chunk vectors, and page metadata are stored in the
+configured SQLite/Postgres database; removing a judgment from its upload card
+deletes its index.
 
 None of the five provider keys is required any more: with
 `ALLOW_CLIENT_KEYS` left on, a deployment with no keys at all boots fine and
@@ -328,7 +337,7 @@ Worth being exact about, because two of the three answers are different:
 | Path | Committed? | On a free Render instance |
 | --- | --- | --- |
 | `data/bare_acts_data.json` | yes, 36 KB | Ships with the repository. Eleven Acts, indexed section by section, so Bare Acts works fully with no setup |
-| `data/litigatai.db` | **no**, `.gitignore` has `data/*.db` | Created empty at start up. Free Render has an ephemeral disk, so anything added is lost on the next restart or deploy |
+| `data/litigatai.db` | **no**, `.gitignore` has `data/*.db` | Stores the case tracker and judgment indexes. Free Render has an ephemeral disk, so data is lost on restart or deploy |
 
 That means the Court Tracker is a blank screen on a fresh deployment unless
 you do one of two things:
@@ -344,7 +353,8 @@ you do one of two things:
   Postgres expires 30 days after creation, so prefer a provider whose free tier
   does not, such as Neon.
 
-Nothing else in the app writes to disk.
+Judgment indexes are stored in the same database and are deleted when a user
+removes the judgment from its upload card.
 
 ---
 
@@ -399,6 +409,7 @@ law-project-hoster/
 │   │   └── registry.py      Discovery, selection and the calls tools make
 │   └── services/
 │       ├── documents.py     PDF, DOCX, image and text extraction with vision OCR
+│       ├── rag.py           Judgment chunking, embeddings, vector retrieval and grounded Q&A
 │       ├── kanoon.py        Indian Kanoon client
 │       ├── analysis.py      List of Dates, Judgment Summariser, Authority Check
 │       ├── research.py      Legal Research, Prompt Enhancer, translation, document chat

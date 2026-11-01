@@ -35,6 +35,7 @@ class Extraction:
     pages: int = 0
     filename: str = ""
     warnings: list[str] = field(default_factory=list)
+    page_texts: list[tuple[int | None, str]] = field(default_factory=list)
 
     @property
     def characters(self) -> int:
@@ -68,12 +69,15 @@ def _suffix(filename: str) -> str:
 
 
 def extract_pdf_text(data: bytes) -> tuple[str, int]:
+    page_texts = extract_pdf_pages(data)
+    return "\n\n".join(part for part in page_texts if part.strip()), len(page_texts)
+
+
+def extract_pdf_pages(data: bytes) -> list[str]:
     import fitz
 
     with fitz.open(stream=data, filetype="pdf") as doc:
-        pages = [page.get_text("text") for page in doc]
-        count = doc.page_count
-    return "\n\n".join(part for part in pages if part.strip()), count
+        return [page.get_text("text") for page in doc]
 
 
 def pdf_page_image(data: bytes, page_number: int, dpi: int = 170) -> bytes:
@@ -126,9 +130,11 @@ def _ocr_images(
     provider: str | None,
     model: str | None,
     separator: str,
-) -> tuple[str, list[str]]:
+    numbered_pages: bool = False,
+) -> tuple[str, list[str], list[tuple[int | None, str]]]:
     parts: list[str] = []
     warnings: list[str] = []
+    page_texts: list[tuple[int | None, str]] = []
     for index, (payload, mime) in enumerate(images, start=1):
         try:
             text = llm.vision(
@@ -146,7 +152,8 @@ def _ocr_images(
         if text.strip().upper() == "BLANK":
             continue
         parts.append(f"[{separator} {index}]\n{text}")
-    return "\n\n".join(parts), warnings
+        page_texts.append((index if numbered_pages else None, text))
+    return "\n\n".join(parts), warnings, page_texts
 
 
 def extract(
@@ -164,15 +171,22 @@ def extract(
     warnings: list[str] = []
 
     if suffix == ".pdf":
-        text, page_count = extract_pdf_text(data)
+        pdf_pages = extract_pdf_pages(data)
+        text = "\n\n".join(part for part in pdf_pages if part.strip())
+        page_count = len(pdf_pages)
         needs_ocr = force_ocr or len(text.strip()) < 120
         if not needs_ocr:
-            return Extraction(text, "pdf-text", page_count, filename)
+            page_texts = [
+                (page_number, page_text)
+                for page_number, page_text in enumerate(pdf_pages, start=1)
+                if page_text.strip()
+            ]
+            return Extraction(text, "pdf-text", page_count, filename, page_texts=page_texts)
 
         pages_to_read = min(page_count, page_budget)
         images = [(pdf_page_image(data, i), "image/png") for i in range(pages_to_read)]
-        ocr_text, ocr_warnings = _ocr_images(
-            images, provider=provider, model=model, separator="Page"
+        ocr_text, ocr_warnings, ocr_pages = _ocr_images(
+            images, provider=provider, model=model, separator="Page", numbered_pages=True
         )
         warnings.extend(ocr_warnings)
         if page_count > pages_to_read:
@@ -181,31 +195,38 @@ def extract(
                 "Raise MAX_OCR_PAGES to read more."
             )
         combined = ocr_text if len(ocr_text.strip()) > len(text.strip()) else text
-        return Extraction(combined, "pdf-ocr", page_count, filename, warnings)
+        page_texts = ocr_pages if len(ocr_text.strip()) > len(text.strip()) else [
+            (page_number, page_text)
+            for page_number, page_text in enumerate(pdf_pages, start=1)
+            if page_text.strip()
+        ]
+        return Extraction(combined, "pdf-ocr", page_count, filename, warnings, page_texts)
 
     if suffix == ".docx":
         text = extract_docx_text(data)
         if len(text.strip()) >= 60 and not force_ocr:
-            return Extraction(text, "docx", 0, filename)
+            return Extraction(text, "docx", 0, filename, page_texts=[(None, text)] if text.strip() else [])
         images = extract_docx_images(data)[:page_budget]
         if not images:
-            return Extraction(text, "docx", 0, filename)
-        ocr_text, ocr_warnings = _ocr_images(
+            return Extraction(text, "docx", 0, filename, page_texts=[(None, text)] if text.strip() else [])
+        ocr_text, ocr_warnings, ocr_pages = _ocr_images(
             images, provider=provider, model=model, separator="Image"
         )
         warnings.extend(ocr_warnings)
         combined = ocr_text if len(ocr_text.strip()) > len(text.strip()) else text
-        return Extraction(combined, "docx-ocr", 0, filename, warnings)
+        page_texts = ocr_pages if len(ocr_text.strip()) > len(text.strip()) else [(None, text)]
+        return Extraction(combined, "docx-ocr", 0, filename, warnings, page_texts)
 
     if suffix in {".png", ".jpg", ".jpeg", ".webp"}:
         mime = _IMAGE_MIME.get(suffix, "image/png")
-        text, ocr_warnings = _ocr_images(
+        text, ocr_warnings, page_texts = _ocr_images(
             [(data, mime)], provider=provider, model=model, separator="Image"
         )
-        return Extraction(text, "image-ocr", 1, filename, ocr_warnings)
+        return Extraction(text, "image-ocr", 1, filename, ocr_warnings, page_texts)
 
     if suffix in {".txt", ".md", ""}:
-        return Extraction(data.decode("utf-8", errors="replace"), "plain-text", 0, filename)
+        text = data.decode("utf-8", errors="replace")
+        return Extraction(text, "plain-text", 0, filename, page_texts=[(None, text)])
 
     raise ValueError(
         f"Unsupported file type '{suffix or filename}'. "
